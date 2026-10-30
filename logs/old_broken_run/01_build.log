@@ -1,0 +1,568 @@
+
+#####################################################
+#  TimeBank -- building the database                #
+#####################################################
+
+[1/6] Clearing any previous build...
+
+PL/SQL procedure successfully completed.
+
+
+PL/SQL procedure successfully completed.
+
+
+PL/SQL procedure successfully completed.
+
+
+PL/SQL procedure successfully completed.
+
+===> Schema cleared.
+
+[2/6] Creating tables, constraints and views...
+
+Sequence created.
+
+
+Sequence created.
+
+
+Sequence created.
+
+
+Sequence created.
+
+
+Sequence created.
+
+
+Sequence created.
+
+
+Table created.
+
+
+Comment created.
+
+
+Table created.
+
+
+Comment created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Comment created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Comment created.
+
+
+Comment created.
+
+
+View created.
+
+
+View created.
+
+
+View created.
+
+===> 14 tables, 6 sequences and 3 views created.
+
+[3/6] Creating indexes and policy settings...
+
+Index created.
+
+
+Index created.
+
+
+Index created.
+
+
+Index created.
+
+
+Index created.
+
+
+Index created.
+
+
+Table created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+Commit complete.
+
+
+PL/SQL procedure successfully completed.
+
+===> Indexes, policy IOT and optimiser statistics created.
+
+[4/6] Compiling triggers...
+
+Trigger created.
+
+
+Trigger created.
+
+
+Trigger created.
+
+
+Trigger created.
+
+
+Trigger created.
+
+
+Trigger created.
+
+===> 6 triggers compiled (5 simple + 1 compound).
+
+[5/6] Compiling PKG_TIMEBANK...
+
+Package created.
+
+
+Package body created.
+
+No errors.
+===> PKG_TIMEBANK compiled.
+
+[6/6] Loading seed data...
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+INSERT INTO student_phone VALUES (102, '9995512340')
+*
+ERROR at line 2:
+ORA-03405: End of query reached; no additional text should follow.
+Help: https://docs.oracle.com/error-help/db/ora-03405/
+
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+INSERT INTO student_phone VALUES (106, '9789011223')
+*
+ERROR at line 2:
+ORA-03405: End of query reached; no additional text should follow.
+Help: https://docs.oracle.com/error-help/db/ora-03405/
+
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+INSERT INTO tutee VALUES (106, 'INTERMEDIATE')
+*
+ERROR at line 2:
+ORA-03405: End of query reached; no additional text should follow.
+Help: https://docs.oracle.com/error-help/db/ora-03405/
+
+
+INSERT INTO tutee VALUES (110, 'ADVANCED')
+*
+ERROR at line 2:
+ORA-03405: End of query reached; no additional text should follow.
+Help: https://docs.oracle.com/error-help/db/ora-03405/
+
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+INSERT INTO tutee_preftime VALUES (105, 'AFTERNOON')
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (TIMEBANK.FK_PREF_TUTEE) violated - parent key
+not found
+Help: https://docs.oracle.com/error-help/db/ora-02291/
+
+
+INSERT INTO tutee_preftime VALUES (106, 'EVENING')
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (TIMEBANK.FK_PREF_TUTEE) violated - parent key
+not found
+Help: https://docs.oracle.com/error-help/db/ora-02291/
+
+
+INSERT INTO tutee_preftime VALUES (109, 'MORNING')
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (TIMEBANK.FK_PREF_TUTEE) violated - parent key
+not found
+Help: https://docs.oracle.com/error-help/db/ora-02291/
+
+
+INSERT INTO tutee_preftime VALUES (109, 'AFTERNOON')
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (TIMEBANK.FK_PREF_TUTEE) violated - parent key
+not found
+Help: https://docs.oracle.com/error-help/db/ora-02291/
+
+
+INSERT INTO tutee_preftime VALUES (110, 'EVENING')
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (TIMEBANK.FK_PREF_TUTEE) violated - parent key
+not found
+Help: https://docs.oracle.com/error-help/db/ora-02291/
+
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+INSERT INTO tutor_skill VALUES (103, 106, 'EXPERT',     'S', TRUNC(SYSDATE)-290)
+*
+ERROR at line 2:
+ORA-03405: End of query reached; no additional text should follow.
+Help: https://docs.oracle.com/error-help/db/ora-03405/
+
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+INSERT INTO tutor_skill VALUES (111, 105, 'PROFICIENT', 'A', TRUNC(SYSDATE)-200);  -- cross-dept
+*
+ERROR at line 2:
+ORA-03405: End of query reached; no additional text should follow.
+Help: https://docs.oracle.com/error-help/db/ora-03405/
+
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+Commit complete.
+
+
+12 rows created.
+
+
+Commit complete.
+
+Creating sessions...
+completed booking 1  tutee 102 <- tutor 101
+DECLARE
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (TIMEBANK.FK_BK_SKILL) violated - parent key
+not found
+ORA-06512: at "TIMEBANK.PKG_TIMEBANK", line 191
+ORA-06512: at line 18
+ORA-06512: at line 33
+Help: https://docs.oracle.com/error-help/db/ora-02291/
+
+
+
+0 rows created.
+
+
+Commit complete.
+
+--------------------------------------------
+CLOSED ECONOMY AUDIT
+--------------------------------------------
+Sum of all balances  : 36
+Held in escrow       : 0
+Grants minus penalty : 36
+Drift                : 0
+RESULT: BALANCED - no credits created or lost.
+--------------------------------------------
+
+PL/SQL procedure successfully completed.
+
+
+===> Seed complete. Row counts:
+
+TABLE_NAME     ROWS_LOADED
+-------------- -----------
+DEPARTMENT               5
+STUDENT                 12
+STUDENT_PHONE           10
+TUTOR                    6
+TUTEE                    3
+TUTEE_PREFTIME           4
+SUBJECT                 10
+TUTOR_SKILL              7
+SLOT                    11
+BOOKING                  0
+FEEDBACK                 0
+
+TABLE_NAME     ROWS_LOADED
+-------------- -----------
+ADMIN                    2
+DISPUTE                  0
+CREDIT_TXN              12
+
+14 rows selected.
+
+
+#####################################################
+#  Build finished. Checking for invalid objects...  #
+#####################################################
+
+no rows selected
+
+
+(No rows above = everything compiled cleanly.)
+
+Now run the five member files in order -- each one builds on the
+data the previous one created, so the sequence matters:
+
+@06_member1_onboarding.sql          Member 1
+@07_member2_skills.sql              Member 2
+@08_member3_booking.sql             Member 3
+@09_member4_credit.sql              Member 4
+@10_member5_feedback_disputes.sql   Member 5
+@11_group_tcl_plans.sql             everyone, together
+
+Each member file holds exactly 9 queries: 1 INSERT, 1 UPDATE,
+1 DELETE and 6 SELECTs (simple, join, nested, correlated,
+aggregate, analytic). See QUERY_PLAN.md for the full breakdown.
+

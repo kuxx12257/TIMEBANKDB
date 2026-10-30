@@ -1,0 +1,82 @@
+
+========== M3-INSERT : book a session ==========
+
+1 row created.
+
+
+1 row created.
+
+Booking 3 created.
+Session code for the TUTEE only: TZ7Y4890
+Sara's balance is now 1.5
+
+PL/SQL procedure successfully completed.
+
+
+========== M3-UPDATE : reschedule by one week ==========
+
+1 row updated.
+
+
+Commit complete.
+
+
+========== M3-DELETE : purge abandoned requests ==========
+
+0 rows deleted.
+
+
+Commit complete.
+
+
+===== M3-Q1 : upcoming sessions (SIMPLE) =====
+
+BOOKING_ID ON_DATE                           START ENDS  DURATION_HOURS SESSION VENUE                                                        STATUS     CREDITS_HELD
+---------- --------------------------------- ----- ----- -------------- ------- ------------------------------------------------------------ ---------- ------------
+         3 FRI 13-NOV-2026                   14:00 15:30            1.5 ONLINE  MS Teams (rescheduled)                                       CONFIRMED           1.5
+
+
+===== M3-Q2 : complete session sheet (SIX-TABLE JOIN) =====
+
+BOOKING_ID TUTEE_NAME                                                                        TUTOR_NAME                                                                        SUBJECT_CODE
+---------- --------------------------------------------------------------------------------- --------------------------------------------------------------------------------- ------------
+TUTOR_SLOT                                                                            SESSION_DATE           HRS STATUS     CHECK_IN              CON
+------------------------------------------------------------------------------------- --------------- ---------- ---------- --------------------- ---
+         3 Sara Khan                                                                         Kabir Singh                                                                       BACSE204
+FRI 14-16                                                                             13-NOV                 1.5 CONFIRMED  not checked in        N/N
+
+
+
+===== M3-Q3 : tutors free all next week (NESTED) =====
+
+TUTOR_NAME                                                                        BADGE_LEVE SLOTS_PUBLISHED SUBJECTS_OFFERED
+--------------------------------------------------------------------------------- ---------- --------------- ----------------
+Aarav Sharma                                                                      BRONZE                   2                2
+Rohan Mehta                                                                       BRONZE                   2                0
+Kabir Singh                                                                       BRONZE                   2                2
+Meera Pillai                                                                      BRONZE                   2                0
+Arjun Patel                                                                       BRONZE                   2                1
+Vivaan Joshi                                                                      BRONZE                   2                2
+Neel Verma                                                                        BRONZE                   1                0
+
+7 rows selected.
+
+
+===== M3-Q4 : tutors busier than average (CORRELATED) =====
+
+no rows selected
+
+
+===== M3-Q5 : booking funnel by subject (AGGREGATE) =====
+
+SUBJECT_CODE SUBJECT_NAME                                                                TOTAL  COMPLETED  CANCELLED   UPCOMING TOTAL_HOURS   PCT_DONE
+------------ ---------------------------------------------------------------------- ---------- ---------- ---------- ---------- ----------- ----------
+BACSE204     Operating Systems                                                               1          0          0          1         1.5          0
+
+
+===== M3-Q6 : running teaching load per tutor (ANALYTIC) =====
+
+no rows selected
+
+
+===== MEMBER 3 COMPLETE : 3 DML + 6 SELECT = 9 queries =====

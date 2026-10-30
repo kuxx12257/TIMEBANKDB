@@ -52,7 +52,7 @@ docker run -d --name oracle-free -p 1521:1521 \
 Create the schema user (connect as SYSTEM to `FREEPDB1`):
 
 ```sql
-CREATE USER timebank IDENTIFIED BY timebank;
+CREATE USER timebank IDENTIFIED BY <choose_a_password>;
 GRANT CONNECT, RESOURCE TO timebank;
 GRANT CREATE VIEW, CREATE PROCEDURE, CREATE TRIGGER, CREATE SEQUENCE TO timebank;
 ALTER USER timebank QUOTA UNLIMITED ON USERS;

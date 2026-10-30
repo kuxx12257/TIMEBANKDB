@@ -1,0 +1,144 @@
+
+========== PART A : TCL ==========
+
+--- A1. SAVEPOINT and partial rollback --
+Balance at the start      : 3
+After the goodwill credit : 5
+After the penalty         : 3
+After ROLLBACK TO savepoint: 5
+=> Correct: the penalty was undone, the credit kept.
+After full ROLLBACK        : 3
+
+PL/SQL procedure successfully completed.
+
+
+--- A2. Atomicity: a failed booking leaves no trace --
+Ledger rows before : 15
+Rejected as expected -> ORA-20011: Tutor 101 has no slot number 9.
+Ledger rows after  : 15   (unchanged = atomic)
+
+PL/SQL procedure successfully completed.
+
+
+========== PART B : see the comments for the two-session demo ==========
+
+========== PART C : query plans ==========
+
+--- C1. Tutor search WITH the index (expect INDEX RANGE SCAN) --
+
+Explained.
+
+
+PLAN_TABLE_OUTPUT
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 29923870
+
+------------------------------------------------------------------------------
+| Id  | Operation                           | Name              | Cost (%CPU)|
+------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT                    |                   |     0   (0)|
+|   1 |  TABLE ACCESS BY INDEX ROWID BATCHED| TUTOR_SKILL       |     0   (0)|
+|   2 |   INDEX RANGE SCAN                  | IDX_SKILL_SUBJECT |     0   (0)|
+------------------------------------------------------------------------------
+
+9 rows selected.
+
+
+--- C2. The same question WITHOUT the index (expect FULL scan) -- PROMPT --- /*+ FULL */ forces the optimiser to ignore it, so the two  -- PROMPT --- costs can be compared directly.                            --
+
+Explained.
+
+
+PLAN_TABLE_OUTPUT
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 3916332905
+
+------------------------------------------------------
+| Id  | Operation         | Name        | Cost (%CPU)|
+------------------------------------------------------
+|   0 | SELECT STATEMENT  |             |     2   (0)|
+|   1 |  TABLE ACCESS FULL| TUTOR_SKILL |     2   (0)|
+------------------------------------------------------
+
+8 rows selected.
+
+
+--- C3. Heuristic optimisation: pushing selection down the tree -- PROMPT --- Both queries below return the same rows. The first filters  -- PROMPT --- early (good), the second joins everything then filters.     --
+
+Explained.
+
+
+PLAN_TABLE_OUTPUT
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 1098356583
+
+-------------------------------------------------------------------------
+| Id  | Operation                      | Name              | Cost (%CPU)|
+-------------------------------------------------------------------------
+|   0 | SELECT STATEMENT               |                   |     0   (0)|
+|   1 |  NESTED LOOPS                  |                   |     0   (0)|
+|   2 |   NESTED LOOPS                 |                   |     0   (0)|
+|   3 |    NESTED LOOPS                |                   |     0   (0)|
+|   4 |     VIEW                       | index$_join$_002  |     0   (0)|
+|   5 |      HASH JOIN                 |                   |            |
+|   6 |       INDEX FAST FULL SCAN     | IDX_BOOKING_SCHED |     0   (0)|
+|   7 |       INDEX FAST FULL SCAN     | PK_BOOKING        |     0   (0)|
+|   8 |     TABLE ACCESS BY INDEX ROWID| FEEDBACK          |     0   (0)|
+|   9 |      INDEX UNIQUE SCAN         | PK_FEEDBACK       |     0   (0)|
+|  10 |    INDEX UNIQUE SCAN           | PK_STUDENT        |     0   (0)|
+|  11 |   TABLE ACCESS BY INDEX ROWID  | STUDENT           |     0   (0)|
+-------------------------------------------------------------------------
+
+18 rows selected.
+
+
+--- C4. Index-only scan: the answer comes from the index alone -- PROMPT --- Look for "INDEX FAST FULL SCAN" and the absence of any     -- PROMPT --- TABLE ACCESS step -- the table is never touched.           --
+
+Explained.
+
+
+PLAN_TABLE_OUTPUT
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 2718051468
+
+---------------------------------------------------------------
+| Id  | Operation            | Name              | Cost (%CPU)|
+---------------------------------------------------------------
+|   0 | SELECT STATEMENT     |                   |     0   (0)|
+|   1 |  SORT GROUP BY NOSORT|                   |     0   (0)|
+|   2 |   INDEX FULL SCAN    | IDX_SKILL_SUBJECT |     0   (0)|
+---------------------------------------------------------------
+
+9 rows selected.
+
+
+========== PART D : final audit ==========
+--------------------------------------------
+CLOSED ECONOMY AUDIT
+--------------------------------------------
+Sum of all balances  : 38.5
+Held in escrow       : 1.5
+Grants minus penalty : 40
+Drift                : 0
+RESULT: BALANCED - no credits created or lost.
+--------------------------------------------
+
+PL/SQL procedure successfully completed.
+
+
+========== PART E : Module 6, graph analytics ==========
+
+--- E1. Tutor leaderboard (CTE + four analytic functions) --
+
+no rows selected
+
+
+--- E2. Knowledge-flow chains (HIERARCHICAL query) --
+
+no rows selected
+
+
+--- E3. Cross-department knowledge flow (ROLLUP) --
+
+no rows selected
+

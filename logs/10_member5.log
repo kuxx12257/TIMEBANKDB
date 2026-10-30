@@ -1,0 +1,145 @@
+
+========== M5-INSERT : leave a review, raise a dispute ==========
+
+1 row created.
+
+Dispute 1 raised on booking 10
+
+PL/SQL procedure successfully completed.
+
+
+========== M5-UPDATE : triage the dispute queue ==========
+
+0 rows updated.
+
+
+Commit complete.
+
+
+========== M5-DELETE : retract a review, drop colluded ratings ==========
+
+3 rows deleted.
+
+
+0 rows deleted.
+
+
+Commit complete.
+
+
+===== M5-Q1 : reviews and disputes (SIMPLE) =====
+
+RECORD_ BOOKING_ID WRITT DETAIL                                   ON_DATE
+------- ---------- ----- ---------------------------------------- --------------------
+NOTE
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+DISPUTE          9 TUTEE RESOLVED                                 30-OCT-2026
+Tutor did not arrive and did not reply to mes...
+
+DISPUTE         10 TUTEE OPEN                                     30-OCT-2026
+Tutor changed the venue twice without telling...
+
+REVIEW           1 TUTOR 4.5                                      27-OCT-2026
+Came prepared with questions written down....
+
+REVIEW           1 TUTEE 5                                        27-OCT-2026
+Explained normalization with real tables. Ver...
+
+REVIEW           2 TUTEE 4                                        27-OCT-2026
+Good on Bayes theorem, but rushed the last ex...
+
+REVIEW           2 TUTOR 5                                        27-OCT-2026
+Picked things up very quickly....
+
+REVIEW           3 TUTEE 5                                        27-OCT-2026
+Sliding window finally makes sense. Great dia...
+
+REVIEW           4 TUTEE 4.5                                      27-OCT-2026
+Knows databases well even though he is from M...
+
+REVIEW           4 TUTOR 5                                        27-OCT-2026
+Asked excellent follow-up questions....
+
+REVIEW           5 TUTEE 3.5                                      27-OCT-2026
+The pumping lemma section was hard to follow....
+
+REVIEW           6 TUTEE 5                                        27-OCT-2026
+Worked through three past-paper problems with...
+
+REVIEW           7 TUTOR 4.5                                      27-OCT-2026
+Already knew the basics, so we went deeper....
+
+REVIEW           7 TUTEE 4.5                                      27-OCT-2026
+Good coverage of greedy versus dynamic progra...
+
+
+13 rows selected.
+
+
+===== M5-Q2 : both sides of each session (SELF JOIN) =====
+
+BOOKING_ID SUBJECT_CODE TUTOR                                    TUTEE                                    TUTEE_RATED_TUTOR TUTOR_RATED_TUTEE DISPUTE_STAT REVIEW_STATE
+---------- ------------ ---------------------------------------- ---------------------------------------- ----------------- ----------------- ------------ ------------
+         1 BACSE202     Aarav                                    Diya                                                     5               4.5 -            both agree
+         2 BMAT201      Arjun                                    Ishita                                                   4                 5 -            both agree
+         3 BACSE203     Vivaan                                   Ananya                                                   5                   -            one-sided
+         4 BACSE202     Rohan                                    Riya                                                   4.5                 5 -            both agree
+         5 BACSE201     Kabir                                    Meera                                                  3.5                   -            one-sided
+         6 BPHY101      Neel                                     Kabir                                                    5                   -            one-sided
+         7 BACSE301     Aarav                                    Arjun                                                  4.5               4.5 -            both agree
+         8 BACSE204     Kabir                                    Diya                                                                         -            no reviews
+         9 BACSE204     Vivaan                                   Ishita                                                                       RESOLVED     no reviews
+        10 BMEE201      Rohan                                    Ananya                                                                       OPEN         no reviews
+        11 BACSE202     Arjun                                    Riya                                                                         -            no reviews
+        12 BACSE202     Aarav                                    Meera                                                                        -            no reviews
+        13 BACSE204     Kabir                                    Sara                                                                         -            no reviews
+
+13 rows selected.
+
+
+===== M5-Q3 : above-average tutors (NESTED) =====
+
+TUTOR_NAME                                                                        BADGE_LEVE THEIR_AVERAGE    REVIEWS CAMPUS_AVERAGE
+--------------------------------------------------------------------------------- ---------- ------------- ---------- --------------
+Vivaan Joshi                                                                      BRONZE                 5          1           4.46
+Neel Verma                                                                        BRONZE                 5          1           4.46
+Aarav Sharma                                                                      BRONZE              4.75          2           4.46
+Rohan Mehta                                                                       BRONZE               4.5          1           4.46
+
+
+===== M5-Q4 : credit-loop collusion detector (CORRELATED) =====
+
+no rows selected
+
+
+===== M5-Q5 : rating distribution by subject (AGGREGATE) =====
+
+SUBJECT               REVIEWS AVG_RATING     SPREAD      WORST       BEST  EXCELLENT       GOOD       POOR
+------------------ ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
+BPHY101                     1          5          0          5          5          1          0          0
+BACSE203                    1          5          0          5          5          1          0          0
+BACSE202                    2       4.75        .35        4.5          5          2          0          0
+BACSE301                    1        4.5          0        4.5        4.5          1          0          0
+BMAT201                     1          4          0          4          4          0          1          0
+BACSE201                    1        3.5          0        3.5        3.5          0          1          0
+** ALL SUBJECTS **          7        4.5        .58        3.5          5          5          2          0
+
+7 rows selected.
+
+
+===== M5-Q6 : rating trend per tutor (ANALYTIC) =====
+
+TUTOR                                    BOOKING_ID SESSION_DATE        RATING PREVIOUS_RATING MOVING_AVG_3 TREND        CAMPUS_RANK PERFORMANCE_THIRD
+---------------------------------------- ---------- --------------- ---------- --------------- ------------ ------------ ----------- -----------------
+Aarav                                             1 19-OCT                   5                            5 first review           1                 1
+Aarav                                             7 21-OCT                 4.5               5         4.75 slipping               2                 2
+Arjun                                             2 22-OCT                   4                            4 first review           3                 3
+Kabir                                             5 19-OCT                 3.5                          3.5 first review           4                 3
+Neel                                              6 23-OCT                   5                            5 first review           1                 1
+Rohan                                             4 20-OCT                 4.5                          4.5 first review           2                 2
+Vivaan                                            3 21-OCT                   5                            5 first review           1                 1
+
+7 rows selected.
+
+
+===== MEMBER 5 COMPLETE : 3 DML + 6 SELECT = 9 queries =====

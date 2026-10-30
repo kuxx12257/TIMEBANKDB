@@ -1,0 +1,19 @@
+
+CON_NAME                                                                        
+------------------------------                                                  
+FREEPDB1                                                                        
+User TIMEBANK already exists - reusing it.                                      
+
+PL/SQL procedure successfully completed.
+
+
+Grant succeeded.
+
+
+Grant succeeded.
+
+
+User altered.
+
+
+===> Done. You can close this window and run 1_BUILD_DATABASE.bat

@@ -1,0 +1,68 @@
+
+========== M5-INSERT : leave a review, raise a dispute ==========
+
+0 rows created.
+
+Dispute 1 raised on booking 3
+
+PL/SQL procedure successfully completed.
+
+
+========== M5-UPDATE : triage the dispute queue ==========
+
+0 rows updated.
+
+
+Commit complete.
+
+
+========== M5-DELETE : retract a review, drop colluded ratings ==========
+
+0 rows deleted.
+
+
+0 rows deleted.
+
+
+Commit complete.
+
+
+===== M5-Q1 : reviews and disputes (SIMPLE) =====
+
+RECORD_ BOOKING_ID WRITT DETAIL                                   ON_DATE
+------- ---------- ----- ---------------------------------------- --------------------
+NOTE
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+DISPUTE          3 TUTEE OPEN                                     30-OCT-2026
+Tutor changed the venue twice without telling...
+
+
+
+===== M5-Q2 : both sides of each session (SELF JOIN) =====
+
+BOOKING_ID SUBJECT_CODE TUTOR                                    TUTEE                                    TUTEE_RATED_TUTOR TUTOR_RATED_TUTEE DISPUTE_STAT REVIEW_STATE
+---------- ------------ ---------------------------------------- ---------------------------------------- ----------------- ----------------- ------------ ------------
+         3 BACSE204     Kabir                                    Sara                                                                         OPEN         no reviews
+
+
+===== M5-Q3 : above-average tutors (NESTED) =====
+
+no rows selected
+
+
+===== M5-Q4 : credit-loop collusion detector (CORRELATED) =====
+
+no rows selected
+
+
+===== M5-Q5 : rating distribution by subject (AGGREGATE) =====
+
+no rows selected
+
+
+===== M5-Q6 : rating trend per tutor (ANALYTIC) =====
+
+no rows selected
+
+
+===== MEMBER 5 COMPLETE : 3 DML + 6 SELECT = 9 queries =====

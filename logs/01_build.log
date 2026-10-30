@@ -1,0 +1,612 @@
+
+#####################################################
+#  TimeBank -- building the database                #
+#####################################################
+
+[1/6] Clearing any previous build...
+Dropped table  : ADMIN
+Dropped table  : BOOKING
+Dropped table  : CREDIT_TXN
+Dropped table  : DEPARTMENT
+Dropped table  : DISPUTE
+Dropped table  : FEEDBACK
+Dropped table  : SLOT
+Dropped table  : STUDENT
+Dropped table  : STUDENT_PHONE
+Dropped table  : SUBJECT
+Dropped table  : TUTEE
+Dropped table  : TUTEE_PREFTIME
+Dropped table  : TUTOR
+Dropped table  : TUTOR_SKILL
+
+PL/SQL procedure successfully completed.
+
+Dropped seq    : SEQ_ADMIN
+Dropped seq    : SEQ_BOOKING
+Dropped seq    : SEQ_DEPT
+Dropped seq    : SEQ_STUDENT
+Dropped seq    : SEQ_SUBJECT
+Dropped seq    : SEQ_TXN
+
+PL/SQL procedure successfully completed.
+
+Dropped view   : V_SLOT_DETAIL
+Dropped view   : V_STUDENT_BALANCE
+Dropped view   : V_TUTOR_PROFILE
+
+PL/SQL procedure successfully completed.
+
+
+PL/SQL procedure successfully completed.
+
+===> Schema cleared.
+
+[2/6] Creating tables, constraints and views...
+
+Sequence created.
+
+
+Sequence created.
+
+
+Sequence created.
+
+
+Sequence created.
+
+
+Sequence created.
+
+
+Sequence created.
+
+
+Table created.
+
+
+Comment created.
+
+
+Table created.
+
+
+Comment created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Comment created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Comment created.
+
+
+Comment created.
+
+
+View created.
+
+
+View created.
+
+
+View created.
+
+===> 14 tables, 6 sequences and 3 views created.
+
+[3/6] Creating indexes and policy settings...
+
+Index created.
+
+
+Index created.
+
+
+Index created.
+
+
+Index created.
+
+
+Index created.
+
+
+Index created.
+
+CREATE TABLE credit_policy (
+             *
+ERROR at line 1:
+ORA-00955: name is already used by an existing object
+Help: https://docs.oracle.com/error-help/db/ora-00955/
+
+
+INSERT INTO credit_policy VALUES
+*
+ERROR at line 1:
+ORA-00001: unique constraint (TIMEBANK.PK_CREDIT_POLICY) violated on table
+TIMEBANK.CREDIT_POLICY columns (POLICY_KEY)
+ORA-03301: (ORA-00001 details) row with column values
+(POLICY_KEY:'STARTER_GRANT') already exists
+Help: https://docs.oracle.com/error-help/db/ora-00001/
+
+
+INSERT INTO credit_policy VALUES
+*
+ERROR at line 1:
+ORA-00001: unique constraint (TIMEBANK.PK_CREDIT_POLICY) violated on table
+TIMEBANK.CREDIT_POLICY columns (POLICY_KEY)
+ORA-03301: (ORA-00001 details) row with column values
+(POLICY_KEY:'OVERDRAFT_FLOOR') already exists
+Help: https://docs.oracle.com/error-help/db/ora-00001/
+
+
+INSERT INTO credit_policy VALUES
+*
+ERROR at line 1:
+ORA-00001: unique constraint (TIMEBANK.PK_CREDIT_POLICY) violated on table
+TIMEBANK.CREDIT_POLICY columns (POLICY_KEY)
+ORA-03301: (ORA-00001 details) row with column values
+(POLICY_KEY:'LATE_CANCEL_HOURS') already exists
+Help: https://docs.oracle.com/error-help/db/ora-00001/
+
+
+
+1 row created.
+
+INSERT INTO credit_policy VALUES
+*
+ERROR at line 1:
+ORA-00001: unique constraint (TIMEBANK.PK_CREDIT_POLICY) violated on table
+TIMEBANK.CREDIT_POLICY columns (POLICY_KEY)
+ORA-03301: (ORA-00001 details) row with column values
+(POLICY_KEY:'DISPUTE_PENALTY') already exists
+Help: https://docs.oracle.com/error-help/db/ora-00001/
+
+
+INSERT INTO credit_policy VALUES
+*
+ERROR at line 1:
+ORA-00001: unique constraint (TIMEBANK.PK_CREDIT_POLICY) violated on table
+TIMEBANK.CREDIT_POLICY columns (POLICY_KEY)
+ORA-03301: (ORA-00001 details) row with column values
+(POLICY_KEY:'PAIR_WEEKLY_CAP') already exists
+Help: https://docs.oracle.com/error-help/db/ora-00001/
+
+
+
+Commit complete.
+
+
+PL/SQL procedure successfully completed.
+
+===> Indexes, policy IOT and optimiser statistics created.
+
+[4/6] Compiling triggers...
+
+Trigger created.
+
+
+Trigger created.
+
+
+Trigger created.
+
+
+Trigger created.
+
+
+Trigger created.
+
+
+Trigger created.
+
+===> 6 triggers compiled (5 simple + 1 compound).
+
+[5/6] Compiling PKG_TIMEBANK...
+
+Package created.
+
+
+Package body created.
+
+No errors.
+===> PKG_TIMEBANK compiled.
+
+[6/6] Loading seed data...
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+Commit complete.
+
+
+12 rows created.
+
+
+Commit complete.
+
+Creating sessions...
+completed booking 1  tutee 102 <- tutor 101
+completed booking 2  tutee 104 <- tutor 109
+completed booking 3  tutee 106 <- tutor 107
+completed booking 4  tutee 110 <- tutor 103
+completed booking 5  tutee 112 <- tutor 105
+completed booking 6  tutee 105 <- tutor 111
+completed booking 7  tutee 109 <- tutor 101
+cancelled booking 8 (tutor withdrew)
+disputed booking 9 resolved for the tutee
+upcoming booking 10  code X15U0UBJ
+upcoming booking 11  code 4I4YQ3GF
+upcoming booking 12  code UW8NW9I8
+Sessions created.
+
+PL/SQL procedure successfully completed.
+
+
+7 rows created.
+
+
+6 rows created.
+
+
+Commit complete.
+
+--------------------------------------------
+CLOSED ECONOMY AUDIT
+--------------------------------------------
+Sum of all balances  : 31
+Held in escrow       : 4
+Grants minus penalty : 35
+Drift                : 0
+RESULT: BALANCED - no credits created or lost.
+--------------------------------------------
+
+PL/SQL procedure successfully completed.
+
+
+===> Seed complete. Row counts:
+
+TABLE_NAME     ROWS_LOADED
+-------------- -----------
+DEPARTMENT               5
+STUDENT                 12
+STUDENT_PHONE           14
+TUTOR                    6
+TUTEE                    7
+TUTEE_PREFTIME           9
+SUBJECT                 10
+TUTOR_SKILL             12
+SLOT                    12
+BOOKING                 12
+FEEDBACK                13
+
+TABLE_NAME     ROWS_LOADED
+-------------- -----------
+ADMIN                    2
+DISPUTE                  1
+CREDIT_TXN              34
+
+14 rows selected.
+
+
+#####################################################
+#  Build finished. Checking for invalid objects...  #
+#####################################################
+
+no rows selected
+
+
+(No rows above = everything compiled cleanly.)
+
+Now run the five member files in order -- each one builds on the
+data the previous one created, so the sequence matters:
+
+@06_member1_onboarding.sql          Member 1
+@07_member2_skills.sql              Member 2
+@08_member3_booking.sql             Member 3
+@09_member4_credit.sql              Member 4
+@10_member5_feedback_disputes.sql   Member 5
+@11_group_tcl_plans.sql             everyone, together
+
+Each member file holds exactly 9 queries: 1 INSERT, 1 UPDATE,
+1 DELETE and 6 SELECTs (simple, join, nested, correlated,
+aggregate, analytic). See QUERY_PLAN.md for the full breakdown.
+

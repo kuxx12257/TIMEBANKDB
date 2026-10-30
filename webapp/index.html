@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TimeBank DB Console</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--panel2:#1c2330;--line:#30363d;--text:#e6edf3;--mut:#8b949e;--acc:#58a6ff;--grn:#3fb950;--red:#f85149;--yel:#d29922;--pur:#bc8cff;--org:#ffa657}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:14px/1.45 "Segoe UI",system-ui,sans-serif}
+code,pre,.mono{font-family:"Cascadia Code",Consolas,"JetBrains Mono",monospace}
+#app{display:grid;grid-template-columns:210px 1fr 44%;grid-template-rows:52px 1fr;height:100vh}
+header{grid-column:1/4;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+header .logo{font-weight:700;font-size:17px}header .logo span{color:var(--acc)}
+.pill{font:12px Consolas,monospace;padding:3px 9px;border-radius:12px;border:1px solid var(--line);color:var(--mut)}
+.pill.ok{color:var(--grn);border-color:#238636}
+header .sp{flex:1}
+nav{background:var(--panel);border-right:1px solid var(--line);overflow:auto;padding:8px 0}
+nav .grp{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.08em;padding:12px 16px 4px}
+nav a{display:flex;gap:8px;padding:7px 16px;color:var(--text);text-decoration:none;border-left:3px solid transparent;cursor:pointer}
+nav a:hover{background:var(--panel2)}nav a.on{background:var(--panel2);border-left-color:var(--acc);color:var(--acc)}
+main{overflow:auto;padding:18px 22px 40px}
+h1{font-size:21px;margin:0 0 4px}h2{font-size:15px;margin:22px 0 8px;color:var(--acc)}
+.sub{color:var(--mut);margin:0 0 12px}
+.wire{font:12px Consolas,monospace;background:#0b1a2b;border:1px solid #1f3a5f;border-radius:6px;padding:8px 10px;margin:8px 0 14px;color:#9ecbff;white-space:pre-wrap}
+.wire b{color:var(--org)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px}
+.card .k{color:var(--mut);font-size:12px}.card .v{font-size:24px;font-weight:700}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;margin:10px 0}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{background:var(--panel2);color:var(--mut);font:600 11px Consolas,monospace;position:sticky;top:0}
+tr:hover td{background:#1a2230}
+.tw{max-height:430px;overflow:auto;border:1px solid var(--line);border-radius:6px}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;border:1px solid var(--line)}
+.t-BOTH,.t-COMPLETED,.t-RESOLVED,.t-GRANT,.t-TRANSFER,.t-RELEASE,.t-ok{color:var(--grn);border-color:#238636}
+.t-CONFIRMED,.t-TUTOR\ ONLY,.t-OPEN{color:var(--acc);border-color:#1f6feb}
+.t-CANCELLED,.t-PENALTY,.t-HOLD,.t-DISPUTED{color:var(--red);border-color:#da3633}
+.t-NEITHER\ YET,.t-TUTEE\ ONLY,.t-CROSS-DEPARTMENT,.t-UNDER_REVIEW{color:var(--yel);border-color:#9e6a03}
+form.f{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;align-items:end}
+label{font-size:11px;color:var(--mut);display:flex;flex-direction:column;gap:3px}
+input,select,textarea{background:#0d1117;border:1px solid var(--line);color:var(--text);border-radius:6px;padding:6px 8px;font:13px inherit}
+textarea{font-family:Consolas,monospace}
+button{background:#238636;border:1px solid #2ea043;color:#fff;border-radius:6px;padding:6px 12px;cursor:pointer;font-weight:600;font-size:12.5px}
+button:hover{filter:brightness(1.15)}button.s{background:var(--panel2);border-color:var(--line);color:var(--text);font-weight:500;padding:3px 8px;font-size:12px}
+button.r{background:#8e1519;border-color:#da3633}button.b{background:#1f6feb;border-color:#388bfd}
+.toast{position:fixed;bottom:18px;left:230px;max-width:52%;padding:10px 14px;border-radius:8px;font-weight:600;z-index:9;box-shadow:0 6px 30px #000a}
+.toast.ok{background:#0f2d1a;border:1px solid #238636;color:#7ee787}.toast.err{background:#3a0f12;border:1px solid #da3633;color:#ffa198}
+/* ---------- SQL console ---------- */
+#con{display:flex;flex-direction:column;background:#010409;border-left:1px solid var(--line);min-width:0}
+#con .hd{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);background:#0b0f14;font:12px Consolas,monospace;color:var(--mut)}
+#con .hd b{color:var(--grn)}#con .hd .sp{flex:1}
+#log{flex:1;overflow:auto;padding:8px 12px;font:12.5px/1.5 "Cascadia Code",Consolas,monospace}
+.e{border-left:2px solid #238636;padding:4px 0 8px 10px;margin:4px 0 10px;animation:fl 1.2s}
+.e.err{border-color:var(--red)}
+@keyframes fl{from{background:#1f6feb33}to{background:transparent}}
+.e .src{color:var(--mut);font-size:11px}.e .src i{color:var(--org);font-style:normal}
+.e pre{margin:3px 0;white-space:pre-wrap;color:#e6edf3}
+.kw{color:#ff7b72;font-weight:600}.st{color:#a5d6ff}.nu{color:#79c0ff}.bd{color:var(--pur)}.fn{color:#d2a8ff}
+.e .bnd{color:var(--yel);font-size:11.5px}.e .res{color:var(--grn)}.e .er{color:var(--red);white-space:pre-wrap}.e .out{color:var(--pur);white-space:pre}
+.prompt{color:var(--grn)}
+.lab{display:grid;grid-template-columns:260px 1fr;gap:12px}
+.lab .list{max-height:75vh;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.lab .list div{padding:7px 10px;border-bottom:1px solid var(--line);cursor:pointer;font-size:12.5px}
+.lab .list div:hover,.lab .list div.on{background:var(--panel2)}.lab .list .m{color:var(--mut);font-size:10.5px;padding:8px 10px 3px;background:#0b0f14;cursor:default}
+pre.code{background:#0b0f14;border:1px solid var(--line);border-radius:6px;padding:10px;font-size:12px;overflow:auto;max-height:300px;margin:6px 0}
+.ex{color:#c9d1d9;margin:2px 0}.ex:before{content:"▸ ";color:var(--acc)}
+.arch{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;margin:10px 0}
+.arch .n{flex:1;min-width:160px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px}
+.arch .n h3{margin:0 0 6px;font-size:14px;color:var(--acc)}.arch .a{align-self:center;color:var(--org);font:700 18px Consolas}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.big{font-size:28px;font-weight:800}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <div class="logo">⏳ Time<span>Bank</span> <span style="color:var(--mut);font-weight:400;font-size:13px">· Peer Tutoring Credit Exchange · Oracle DBMS project</span></div>
+  <div class="sp"></div>
+  <span class="pill ok mono" id="conn">● oracledb → timebank@localhost:1521/FREEPDB1</span>
+  <button class="s" onclick="resetDb()">⟳ Rebuild DB (run_all.sql)</button>
+</header>
+<nav id="nav"></nav>
+<main id="main"></main>
+<section id="con">
+  <div class="hd"><b>SQL*Plus live</b> · every statement the website runs <span class="sp"></span>
+    <span id="cnt">0 statements</span><button class="s" onclick="LOG.innerHTML='';n=0;cnt.textContent='0 statements'">clear</button></div>
+  <div id="log"><div class="prompt">SQL*Plus: connected to TIMEBANK @ FREEPDB1<br>SQL&gt; _ waiting for the frontend...</div></div>
+</section>
+</div>
+<script>
+const $=s=>document.querySelector(s), LOG=$('#log'); let n=0, LK=null;
+const esc=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const KW='SELECT|FROM|WHERE|AND|OR|NOT|IN|EXISTS|JOIN|LEFT|RIGHT|OUTER|INNER|ON|GROUP|BY|ORDER|HAVING|AS|CASE|WHEN|THEN|ELSE|END|INSERT|INTO|VALUES|UPDATE|SET|DELETE|BEGIN|DECLARE|UNION|ALL|DISTINCT|NULL|IS|OVER|PARTITION|ROWS|BETWEEN|UNBOUNDED|PRECEDING|CURRENT|ROW|WITH|COMMIT|ROLLBACK|DESC|ASC|GROUPING|SETS|ROLLUP|START|CONNECT|PRIOR|NOCYCLE|EXPLAIN|PLAN|FOR|TABLE|SIBLINGS|WITHIN|DUAL|LIKE|ROWNUM';
+function hl(sql){let h=esc(sql);
+ h=h.replace(/('[^']*')|(:\w+)|\b(\d+(?:\.\d+)?)\b|\b(pkg_timebank\.\w+|NVL|SUM|COUNT|AVG|MIN|MAX|ROUND|FLOOR|TO_CHAR|TO_DATE|TRUNC|SYSDATE|RANK|DENSE_RANK|ROW_NUMBER|LAG|LEAD|NTILE|FIRST_VALUE|PERCENT_RANK|RATIO_TO_REPORT|LISTAGG|MONTHS_BETWEEN|STDDEV|SYS_CONNECT_BY_PATH|LPAD|RPAD)\b|\b(SELECT|FROM|WHERE|AND|OR|NOT|IN|EXISTS|JOIN|LEFT|RIGHT|OUTER|INNER|ON|GROUP|BY|ORDER|HAVING|AS|CASE|WHEN|THEN|ELSE|END|INSERT|INTO|VALUES|UPDATE|SET|DELETE|BEGIN|DECLARE|UNION|ALL|DISTINCT|NULL|IS|OVER|PARTITION|ROWS|BETWEEN|UNBOUNDED|PRECEDING|CURRENT|ROW|WITH|COMMIT|ROLLBACK|DESC|ASC|GROUPING|SETS|ROLLUP|START|CONNECT|PRIOR|NOCYCLE|EXPLAIN|PLAN|FOR|TABLE|SIBLINGS|WITHIN|DUAL|LIKE|ROWNUM)\b/gi,
+ (m,s,b,nu,f,k)=>s?`<span class=st>${s}</span>`:b?`<span class=bd>${b}</span>`:nu?`<span class=nu>${nu}</span>`:f?`<span class=fn>${f}</span>`:`<span class=kw>${k.toUpperCase()}</span>`);return h}
+function logEntries(list){for(const e of list){n++;const d=document.createElement('div');d.className='e'+(e.error?' err':'');
+ const b=e.binds&&Object.keys(e.binds).length?`<div class=bnd>binds: ${esc(JSON.stringify(e.binds))}</div>`:'';
+ d.innerHTML=`<div class=src>#${n} · ${e.t} · <i>${esc(e.source)}</i></div><pre><span class=prompt>SQL&gt; </span>${hl(e.sql)}${/^(BEGIN|DECLARE)/i.test(e.sql)?'':';'}</pre>${b}`+
+ (e.error?`<div class=er>${esc(e.error)}</div>`:`<div class=res>✔ ${esc(e.result)} <span style="color:var(--mut)">(${e.ms} ms)</span></div>`)+
+ (e.output?`<div class=out>${esc(e.output.join('\n'))}</div>`:'');
+ LOG.appendChild(d);} LOG.scrollTop=LOG.scrollHeight; cnt.textContent=n+' statements';}
+function toast(msg,ok=true){const t=document.createElement('div');t.className='toast '+(ok?'ok':'err');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),ok?3500:7000)}
+async function api(name,body={},ui){const r=await fetch('/api/'+name,{method:'POST',body:JSON.stringify({...body,_ui:ui})});const j=await r.json();logEntries(j.log||[]);
+ if(!j.ok){toast(j.error,false);throw j.error} if(j.data&&j.data.msg)toast(j.data.msg); return j.data}
+function tbl(d,opts={}){if(!d||!d.cols)return'';const tagc=opts.tags||[];
+ return `<div class=tw><table><tr>${d.cols.map(c=>`<th>${esc(c)}</th>`).join('')}${opts.act?'<th>ACTIONS</th>':''}</tr>`+
+ (d.rows.length?d.rows.map(r=>`<tr>${r.map((v,i)=>`<td>${tagc.includes(d.cols[i])&&v!=null?`<span class="tag t-${esc(v)}">${esc(v)}</span>`:esc(v??'')}</td>`).join('')}${opts.act?`<td>${opts.act(r,d.cols)}</td>`:''}</tr>`).join(''):
+ `<tr><td colspan=99 style="color:var(--mut)">no rows selected</td></tr>`)+`</table></div>`}
+const wire=t=>`<div class=wire>${t}</div>`;
+const fv=f=>Object.fromEntries(new FormData(f).entries());
+async function lookups(){LK=await api('lookups',{}, 'load dropdowns');return LK}
+const opt=(d,sel)=>d.rows.map(r=>`<option value="${r[0]}" ${r[0]==sel?'selected':''}>${r[0]} · ${esc(r[1])}</option>`).join('');
+
+const PAGES={
+dash:{t:'Dashboard',g:'Overview',ic:'▦',async r(){const d=await api('dashboard',{},'Dashboard load');const a=d.audit.rows[0];const drift=(a[0]+a[1]-a[2]).toFixed(1);
+ return `<h1>Dashboard</h1><p class=sub>Live counts straight from Oracle. Every number below came from a query you can see on the right.</p>
+ ${wire('Page load  →  <b>POST /api/dashboard</b>  →  server.py api_dashboard()  →  3 SELECTs on STUDENT, TUTOR, TUTEE, SUBJECT, BOOKING, CREDIT_TXN, DISPUTE')}
+ <div class=cards>${d.counts.rows.map(r=>`<div class=card><div class=k>${r[0]}</div><div class=v>${r[1]}</div></div>`).join('')}</div>
+ <div class=grid2><div class=box><h2 style="margin-top:0">Closed-economy audit</h2>
+ <div class=mono>balances <b>${a[0]}</b> + escrow <b>${a[1]}</b> = <b>${(a[0]+a[1]).toFixed(1)}</b><br>grants − penalties = <b>${a[2]}</b><br>drift = <b>${drift}</b></div>
+ <div class=big style="color:${drift==0?'var(--grn)':'var(--red)'}">${drift==0?'BALANCED ✔':'BROKEN ✘'}</div></div>
+ <div class=box><h2 style="margin-top:0">Bookings by status</h2>${tbl(d.status,{tags:['STATUS']})}</div></div>`}},
+arch:{t:'How it is connected',g:'Overview',ic:'⛓',async r(){return `<h1>Architecture - how each part is connected</h1><p class=sub>Three tiers. The browser never talks to Oracle directly; the Python server does, using the oracledb driver (the Python equivalent of JDBC).</p>
+ <div class=arch><div class=n><h3>1 · Browser (index.html)</h3>Buttons and forms. Each one calls <code>fetch('/api/&lt;name&gt;')</code> with JSON.</div><div class=a>⇄</div>
+ <div class=n><h3>2 · server.py</h3>One Python function per button (<code>api_book</code>, <code>api_checkin</code>...). It runs SQL with <b>bind variables</b> (<code>:tutee</code>), never string concatenation → no SQL injection.</div><div class=a>⇄</div>
+ <div class=n><h3>3 · Oracle 26ai FREEPDB1</h3>14 tables, 3 views, 6 triggers, PKG_TIMEBANK. All business rules live here, so they hold for every client.</div></div>
+ <h2>Which button runs what</h2>${tbl({cols:['FRONTEND ACTION','API ROUTE','SQL / PL/SQL EXECUTED','TABLES TOUCHED'],rows:[
+ ['Students ▸ Register','api/student_add','pkg_timebank.enrol_student + INSERT student_phone','STUDENT, CREDIT_TXN, STUDENT_PHONE'],
+ ['Students ▸ Make tutor/tutee','api/make_role','INSERT INTO tutor / tutee','TUTOR, TUTEE'],
+ ['Students ▸ Deactivate','api/student_status','UPDATE student SET account_status','STUDENT'],
+ ['Students ▸ Hard delete','api/student_delete','DELETE FROM student  (blocked by FK)','STUDENT'],
+ ['Skills ▸ Add skill / slot','api/skill_add, api/slot_add','INSERT tutor_skill / slot','TUTOR_SKILL, SLOT'],
+ ['Book ▸ Book session','api/book','pkg_timebank.book_session (FOR UPDATE lock, HOLD)','SLOT, BOOKING, CREDIT_TXN'],
+ ['Bookings ▸ Check in','api/checkin','pkg_timebank.check_in','BOOKING'],
+ ['Bookings ▸ Confirm','api/confirm','pkg_timebank.confirm_session (TRANSFER)','BOOKING, CREDIT_TXN, TUTOR'],
+ ['Bookings ▸ Cancel','api/cancel','pkg_timebank.cancel_booking (RELEASE)','BOOKING, CREDIT_TXN'],
+ ['Bookings ▸ Reschedule','api/reschedule','UPDATE booking ... NOT EXISTS','BOOKING'],
+ ['Bookings ▸ Dispute','api/dispute_raise','pkg_timebank.raise_dispute','DISPUTE, BOOKING'],
+ ['Disputes ▸ Resolve','api/dispute_resolve','pkg_timebank.resolve_dispute (PENALTY)','DISPUTE, BOOKING, CREDIT_TXN'],
+ ['Feedback ▸ Review','api/feedback_add','INSERT INTO feedback (trigger checks COMPLETED)','FEEDBACK'],
+ ['Ledger ▸ Tamper','api/tamper','UPDATE / DELETE credit_txn (trigger blocks)','CREDIT_TXN'],
+ ['Audit','api/audit','pkg_timebank.audit_economy + GROUPING SETS','CREDIT_TXN, BOOKING'],
+ ['Policies ▸ Save','api/policy_set','UPDATE credit_policy','CREDIT_POLICY (IOT)'],
+ ['Query Lab ▸ Run','api/lab_run','the members\' query files, read from ../sql','all'],
+ ['SQL Console ▸ Execute','api/console','any SQL you type','any']]})}
+ <h2>Key design decisions</h2><div class=box>
+ <p class=ex>Specialization is OVERLAPPING + PARTIAL → mapping option 8A (STUDENT + TUTOR + TUTEE tables).</p>
+ <p class=ex>BOOKING has two COMPOSITE foreign keys that share tutor_id → slot and subject must belong to the same tutor.</p>
+ <p class=ex>Derived attributes (balance, age, hours, rating) are views - never stored.</p>
+ <p class=ex>CREDIT_TXN is append-only (trigger) → the closed-economy audit always balances.</p>
+ <p class=ex>Weak entities: SLOT (owner TUTOR), FEEDBACK and DISPUTE (owner BOOKING).</p></div>`}},
+students:{t:'Students',g:'Module 1',ic:'👤',async r(){await lookups();const d=await api('students',{},'Students load');
+ return `<h1>Students</h1><p class=sub>Superclass STUDENT with overlapping/partial subclasses TUTOR and TUTEE. Balance and age are derived.</p>
+ ${wire('Table  →  <b>api/students</b>  →  4-table JOIN with two LEFT JOINs (M1-Q2) + view v_student_balance + LISTAGG on STUDENT_PHONE')}
+ ${tbl(d,{tags:['ROLE_IN_SYSTEM','ACCOUNT_STATUS'],act:(r)=>`<button class=s onclick="stuAct('TUTOR',${r[0]})">+tutor</button> <button class=s onclick="stuAct('TUTEE',${r[0]})">+tutee</button> <button class=s onclick="stuStatus(${r[0]},'${r[8]=='ACTIVE'?'INACTIVE':'ACTIVE'}')">${r[8]=='ACTIVE'?'deactivate':'activate'}</button> <button class="s" onclick="stuDel(${r[0]})">delete</button>`})}
+ <h2>Register a student</h2>${wire('Form submit  →  <b>api/student_add</b>  →  pkg_timebank.enrol_student (STUDENT + GRANT 3.0 in one transaction)  →  INSERT student_phone per number')}
+ <form class=f onsubmit="event.preventDefault();api('student_add',fv(this),'Register student button').then(()=>go('students'))">
+ <label>Reg no<input name=reg value="25BCE${Math.floor(1100+Math.random()*800)}" required></label><label>First name<input name=fn value="Rahul" required></label><label>Last name<input name=ln value="Verma" required></label>
+ <label>Email<input name=email value="rahul${Math.floor(Math.random()*999)}@vit.ac.in" required></label><label>DOB<input type=date name=dob value="2005-05-05" required></label>
+ <label>Department<select name=dept>${opt(LK.depts)}</select></label><label>Block<input name=block value="A Block"></label><label>Room<input name=room value="101"></label><label>City<input name=city value="Vellore"></label>
+ <label>Phones (comma separated)<input name=phones value="9876543210, 9123456780"></label><button>Register student</button></form>`}},
+skills:{t:'Skills & Slots',g:'Module 2',ic:'🎓',async r(){await lookups();const d=await api('skills',{},'Skills load');
+ return `<h1>Skills &amp; availability</h1><p class=sub>TUTOR_SKILL is the M:N relationship "offers". SLOT is a WEAK entity (key = tutor_id + slot_no).</p>
+ ${wire('Page  →  <b>api/skills</b>  →  5-table JOIN (DEPARTMENT twice) + view v_slot_detail + NOT IN subquery for coverage gaps')}
+ <h2>Skill matrix</h2>${tbl(d.skills,{tags:['NOTE']})}
+ <h2>Add a skill</h2><form class=f onsubmit="event.preventDefault();api('skill_add',fv(this),'Add skill button').then(()=>go('skills'))">
+ <label>Tutor<select name=tutor>${opt(LK.tutors)}</select></label><label>Subject<select name=subject>${opt(LK.subjects)}</select></label>
+ <label>Level<select name=level><option>BEGINNER<option>PROFICIENT<option selected>EXPERT</select></label><label>Grade<select name=grade><option>S<option>A<option>B<option>C</select></label><button>Add skill</button></form>
+ <h2>Slots (weak entity)</h2>${tbl(d.slots,{act:r=>`<button class=s onclick="api('slot_delete',{tutor:${r[0]},slot:${r[2]}},'Delete slot button').then(()=>go('skills'))">delete</button>`})}
+ <form class=f style="margin-top:8px" onsubmit="event.preventDefault();api('slot_add',fv(this),'Add slot button').then(()=>go('skills'))">
+ <label>Tutor<select name=tutor>${opt(LK.tutors)}</select></label><label>Day<select name=day>${['MON','TUE','WED','THU','FRI','SAT','SUN'].map(x=>`<option>${x}`).join('')}</select></label>
+ <label>Start (24h)<input name=start type=number step=0.5 value=9></label><label>End<input name=end type=number step=0.5 value=11></label><button>Add slot</button></form>
+ <h2>Coverage gaps - subjects with no tutor</h2>${tbl(d.gaps)}`}},
+book:{t:'Book a session',g:'Module 3',ic:'📅',async r(){await lookups();setTimeout(bookSync,0);
+ return `<h1>Book a session</h1><p class=sub>Calls PKG_TIMEBANK.BOOK_SESSION: lock slot (FOR UPDATE) → check clash → pair cap → INSERT booking → HOLD credits in escrow.</p>
+ ${wire('Book button  →  <b>api/book</b>  →  BEGIN pkg_timebank.book_session(...) END;\n   triggers fired: trg_credit_floor (overdraft), trg_booking_fits_slot (time + weekday)\n   composite FKs checked: (tutor_id, slot_no) → SLOT, (tutor_id, subject_id) → TUTOR_SKILL')}
+ <form class=f id=bf onsubmit="event.preventDefault();api('book',fv(this),'Book session button').then(()=>go('bookings'))">
+ <label>Tutee<select name=tutee>${opt(LK.tutees)}</select></label><label>Tutor<select name=tutor onchange=bookSync()>${opt(LK.tutors)}</select></label>
+ <label>Subject (tutor's skills)<select name=subject></select></label><label>Slot<select name=slot onchange=bookDate()></select></label>
+ <label>Date<input type=date name=date></label><label>Start hour<input type=number step=0.5 name=start></label>
+ <label>Duration<select name=dur><option>0.5<option selected>1<option>1.5<option>2</select></label><label>Mode<select name=mode><option>ONLINE<option>OFFLINE</select></label>
+ <label>Venue<input name=venue value="Google Meet"></label><button class=b>Book session</button></form>
+ <div class=box><b>Try the rules:</b><p class=ex>Pick a subject the tutor does not teach → composite FK error ORA-02291 (only possible via SQL Console).</p><p class=ex>Change the date to a different weekday → ORA-20007 from trigger trg_booking_fits_slot.</p><p class=ex>Book the same slot + date twice → ORA-20005 double booking blocked.</p><p class=ex>Tutee = tutor → ORA-20010.</p></div>`}},
+bookings:{t:'Bookings',g:'Module 3',ic:'📋',async r(){await lookups();const d=await api('bookings',{},'Bookings load');
+ return `<h1>Bookings - full session life cycle</h1><p class=sub>Booked (HOLD) → tutor enters session code (check-in) → both confirm (TRANSFER). Or cancel (RELEASE) / dispute.</p>
+ ${wire('Table  →  <b>api/bookings</b>  →  6-table JOIN (M3-Q2), SLOT joined on BOTH tutor_id AND slot_no\nButtons  →  api/checkin · api/confirm · api/cancel · api/reschedule · api/dispute_raise  →  PKG_TIMEBANK procedures')}
+ ${tbl(d,{tags:['STATUS'],act:(r)=>r[10]=='CONFIRMED'?`<button class=s onclick="bkCheck(${r[0]},'${r[12]}')">check-in</button> <button class=s onclick="bkConf(${r[0]},'TUTOR')">✔tutor</button> <button class=s onclick="bkConf(${r[0]},'TUTEE')">✔tutee</button> <button class=s onclick="bkCancel(${r[0]})">cancel</button> <button class=s onclick="api('reschedule',{id:${r[0]}},'Reschedule button').then(()=>go('bookings'))">+1 week</button> <button class=s onclick="bkDisp(${r[0]})">dispute</button>`:''})}
+ <div class=box><p class=ex>Confirming a FUTURE session fails with ORA-20003 (trigger trg_confirm_after_end) - that is the rule working.</p><p class=ex>Confirming without check-in fails with ORA-20004 - the session code proves the tutee attended.</p></div>`}},
+feedback:{t:'Feedback',g:'Module 5',ic:'★',async r(){const d=await api('feedback',{},'Feedback load');
+ return `<h1>Feedback (weak entity, key = booking_id + reviewer_role)</h1>
+ ${wire('Table  →  <b>api/feedback</b>  →  SELF JOIN: FEEDBACK joined twice (TUTEE review + TUTOR review), both LEFT JOIN\nForm  →  <b>api/feedback_add</b>  →  INSERT INTO feedback  (trg_feedback_valid: only COMPLETED; PK stops double reviews)')}
+ ${tbl(d)}<h2>Leave a review</h2><form class=f onsubmit="event.preventDefault();api('feedback_add',fv(this),'Submit review button').then(()=>go('feedback'))">
+ <label>Booking id<input name=id type=number value="${d.rows[0]?d.rows[0][0]:1}"></label><label>Written by<select name=role><option>TUTEE<option>TUTOR</select></label>
+ <label>Rating 1-5<input name=rating type=number step=0.5 min=1 max=5 value=4.5></label><label>Comment<input name=comment value="Very helpful session"></label><button>Submit review</button></form>
+ <h2>Tutor profiles (view v_tutor_profile - derived attributes)</h2><div id=tp></div>`},async after(){$('#tp').innerHTML=tbl(await api('tutors',{},'Tutor profile view'),{tags:['BADGE_LEVEL']})}},
+disputes:{t:'Disputes',g:'Module 5',ic:'⚖',async r(){await lookups();const d=await api('disputes',{},'Disputes load');
+ return `<h1>Disputes (weak entity, key = booking_id + dispute_no)</h1>
+ ${wire('Table  →  <b>api/disputes</b>  →  DISPUTE LEFT JOIN ADMIN (resolved_by is a nullable FK)\nResolve  →  <b>api/dispute_resolve</b>  →  pkg_timebank.resolve_dispute → RELEASE + PENALTY (the only way credits leave)')}
+ ${tbl(d,{tags:['STATUS'],act:r=>r[5]!='RESOLVED'?`<select id=ad${r[0]}>${opt(LK.admins)}</select> <button class=s onclick="resolve(${r[0]},${r[1]},'TUTEE')">favour tutee</button> <button class=s onclick="resolve(${r[0]},${r[1]},'TUTOR')">favour tutor</button>`:''})}
+ <div class=box><p class=ex>Raise new disputes from the Bookings page.</p></div>`}},
+ledger:{t:'Credit ledger',g:'Module 4',ic:'₵',async r(){await lookups();const d=await api('ledger',{},'Ledger load');
+ return `<h1>Credit ledger (append-only)</h1><p class=sub>booking_id is the only nullable FK: GRANT and PENALTY rows have no session, so the join must be OUTER.</p>
+ ${wire('Table  →  <b>api/ledger</b>  →  CREDIT_TXN JOIN STUDENT LEFT JOIN BOOKING LEFT JOIN SUBJECT\nTamper buttons  →  <b>api/tamper</b>  →  UPDATE / DELETE credit_txn  →  blocked by trigger trg_txn_immutable (ORA-20001)')}
+ <div class=box><b>Prove the ledger cannot be edited:</b> <button class=r onclick="api('tamper',{kind:'update'},'Tamper UPDATE button').catch(()=>{})">Try UPDATE amount = 999</button> <button class=r onclick="api('tamper',{kind:'delete'},'Tamper DELETE button').catch(()=>{})">Try DELETE row</button></div>
+ <label style="max-width:320px">Passbook for one student<select onchange="pass(this.value)"><option value="">— all students —</option>${opt(LK.students)}</select></label><div id=lt style="margin-top:8px">${tbl(d,{tags:['TXN_TYPE']})}</div>`}},
+audit:{t:'Economy audit',g:'Module 4',ic:'⚖',async r(){const d=await api('audit',{},'Run audit button');const a=d.eq.rows[0];const drift=(a[0]+a[1]-a[2]).toFixed(1);
+ return `<h1>Closed-economy audit</h1><p class=sub>sum of all balances + credits in escrow = total granted − total penalised</p>
+ ${wire('Page  →  <b>api/audit</b>  →  pkg_timebank.audit_economy (DBMS_OUTPUT) + equation query + GROUPING SETS + correlated tamper check (M4-Q4)')}
+ <div class=grid2><div class=box><div class=mono>${a[0]} + ${a[1]} = ${(a[0]+a[1]).toFixed(1)}  vs  ${a[2]}</div><div class=big style="color:${drift==0?'var(--grn)':'var(--red)'}">${drift==0?'BALANCED ✔':'BROKEN ✘'}</div>
+ <pre class=code>${esc((d.output||[]).join('\n'))}</pre></div><div class=box><h2 style="margin-top:0">By transaction type</h2>${tbl(d.by_type)}</div></div>
+ <h2>Tamper check - snapshots that do not match (expect none)</h2>${tbl(d.tamper)}<button onclick="go('audit')">Re-run audit</button>`}},
+policy:{t:'Policies (IOT)',g:'Module 4',ic:'⚙',async r(){const d=await api('policy',{},'Policies load');
+ return `<h1>Credit policy - index-organised table</h1>${wire('Save  →  <b>api/policy_set</b>  →  UPDATE credit_policy  → triggers read the new value on the next booking (no recompiling)')}
+ ${tbl(d,{act:r=>`<input id="p_${r[0]}" value="${r[1]}" style="width:70px"> <button class=s onclick="api('policy_set',{key:'${r[0]}',value:$('#p_${r[0]}').value},'Save policy button').then(()=>go('policy'))">save</button>`})}`}},
+lab:{t:'Query Lab (all 30+ queries)',g:'Queries',ic:'⌘',async r(){const d=await api('lab_list',{},'Query Lab load');window.LAB=d.lab;let m='';
+ return `<h1>Query Lab - every SELECT from the 5 member files + group file</h1>${wire('Click  →  <b>api/lab_run</b>  →  server reads the statement from ../sql/0X_member*.sql and executes it exactly as written')}
+ <div class=lab><div class=list>${d.lab.map((q,i)=>{const h=q.member!=m?`<div class=m>${m=q.member}</div>`:'';return h+`<div onclick="labShow(${i})" id=lq${i}><b>${q.id}</b> ${esc(q.title)}</div>`}).join('')}</div><div id=lq><p class=sub>← choose a query</p></div></div>`}},
+console:{t:'SQL Console',g:'Queries',ic:'>_',async r(){return `<h1>SQL Console</h1><p class=sub>Type any SQL or PL/SQL and run it against TIMEBANK. Separate statements with ;</p>
+ ${wire('Execute  →  <b>api/console</b>  →  statements run one by one; result grids below, statement log on the right')}
+ <textarea id=sq rows=9 style="width:100%">SELECT * FROM v_student_balance ORDER BY credit_balance DESC;</textarea>
+ <div style="margin:6px 0"><label style="flex-direction:row;align-items:center;gap:6px;display:inline-flex"><input type=checkbox id=ac> auto-COMMIT</label>
+ <button onclick="runSql()">▶ Execute (Ctrl+Enter)</button>
+ ${['SELECT * FROM booking','SELECT * FROM credit_txn ORDER BY txn_id','SELECT * FROM v_tutor_profile','SELECT table_name FROM user_tables','SELECT trigger_name, triggering_event, table_name FROM user_triggers','SELECT constraint_name, constraint_type, table_name FROM user_constraints WHERE constraint_type IN (\'P\',\'R\') ORDER BY table_name'].map(q=>`<button class=s onclick="$('#sq').value=\`${q};\`;runSql()">${q.slice(0,34)}…</button>`).join(' ')}</div><div id=sr></div>`},after(){$('#sq').onkeydown=e=>{if(e.ctrlKey&&e.key=='Enter')runSql()}}},
+};
+async function go(p){location.hash=p;document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.dataset.p==p));
+ const P=PAGES[p];try{$('#main').innerHTML=await P.r();P.after&&P.after()}catch(e){$('#main').innerHTML=`<h1>${P.t}</h1><div class="toast err" style="position:static">${esc(e)}</div>`}}
+let g='';$('#nav').innerHTML=Object.entries(PAGES).map(([k,v])=>(v.g!=g?`<div class=grp>${g=v.g}</div>`:'')+`<a data-p=${k} onclick="go('${k}')"><span>${v.ic}</span>${v.t}</a>`).join('');
+// ---- actions ----
+const stuAct=(role,id)=>api('make_role',{role,id},`Make ${role} button`).then(()=>go('students')).catch(()=>{});
+const stuStatus=(id,status)=>api('student_status',{id,status},'Status button').then(()=>go('students'));
+const stuDel=id=>confirmBox(`Hard-delete student ${id}? (Oracle should block this if they have bookings or ledger rows)`)&&api('student_delete',{id},'Hard delete button').then(()=>go('students')).catch(()=>{});
+const confirmBox=m=>window.confirm(m);
+function bookSync(){const f=$('#bf');if(!f)return;const t=+f.tutor.value;const sk=LK.skills.rows.filter(r=>r[0]==t).map(r=>r[1]);
+ f.subject.innerHTML=LK.subjects.rows.filter(r=>sk.includes(r[0])).map(r=>`<option value=${r[0]}>${esc(r[1])}</option>`).join('');
+ f.slot.innerHTML=LK.slots.rows.filter(r=>r[0]==t).map(r=>`<option value=${r[1]} data-d=${r[2]} data-s=${r[3]}>#${r[1]} ${r[2]} ${r[3]}-${r[4]}</option>`).join('');bookDate()}
+function bookDate(){const f=$('#bf');const o=f.slot.selectedOptions[0];if(!o)return;const days=['SUN','MON','TUE','WED','THU','FRI','SAT'];const want=days.indexOf(o.dataset.d);
+ const d=new Date();d.setDate(d.getDate()+14);while(d.getDay()!=want)d.setDate(d.getDate()+1);f.date.value=d.toISOString().slice(0,10);f.start.value=o.dataset.s}
+const bkCheck=(id,code)=>{const c=prompt('Tutor: enter the session code the tutee shows you',code);c&&api('checkin',{id,code:c},'Check-in button').then(()=>go('bookings')).catch(()=>{})};
+const bkConf=(id,role)=>api('confirm',{id,role},`Confirm as ${role} button`).then(()=>go('bookings')).catch(()=>{});
+const bkCancel=id=>{const role=prompt('Who cancels? TUTOR or TUTEE','TUTEE');role&&api('cancel',{id,role:role.toUpperCase()},'Cancel button').then(()=>go('bookings')).catch(()=>{})};
+const bkDisp=id=>{const reason=prompt('Reason for the dispute','Tutor did not turn up');reason&&api('dispute_raise',{id,role:'TUTEE',reason},'Raise dispute button').then(()=>go('disputes')).catch(()=>{})};
+const resolve=(id,dno,favour)=>api('dispute_resolve',{id,dno,favour,admin:$('#ad'+id).value,note:'Resolved from the admin dashboard in favour of the '+favour.toLowerCase()},'Resolve dispute button').then(()=>go('disputes')).catch(()=>{});
+async function pass(sid){$('#lt').innerHTML=tbl(await api('ledger',{student:sid},sid?'Passbook select':'Ledger load'),{tags:['TXN_TYPE']})}
+function labShow(i){const q=LAB[i];document.querySelectorAll('.lab .list div').forEach(d=>d.classList.remove('on'));$('#lq'+i).classList.add('on');
+ $('#lq').innerHTML=`<h2 style="margin-top:0">${q.id} · ${esc(q.title)}</h2><div class=box>${q.explain.map(x=>`<p class=ex>${esc(x)}</p>`).join('')}</div><pre class=code>${hl(q.sql)}</pre><button onclick="labRun(${i})">▶ Run ${q.id}</button><div id=lr></div>`}
+async function labRun(i){const q=LAB[i];const d=await api('lab_run',{id:q.id},`Query Lab ▸ ${q.id}`).catch(()=>null);if(d)$('#lr').innerHTML=d.results.map(r=>'<h2>Result</h2>'+tbl(r)).join('')}
+async function runSql(){const d=await api('console',{sql:$('#sq').value,autocommit:$('#ac').checked},'SQL Console execute').catch(()=>null);if(d)$('#sr').innerHTML=d.results.map(r=>tbl(r)).join('')||'<p class=sub>Done.</p>'}
+async function resetDb(){if(!confirm('Rebuild the whole database from run_all.sql? (about 15 seconds)'))return;toast('Rebuilding...');await api('reset',{},'Rebuild DB button');go(location.hash.slice(1)||'dash')}
+go(location.hash.slice(1)||'dash');
+</script>
+</body>
+</html>

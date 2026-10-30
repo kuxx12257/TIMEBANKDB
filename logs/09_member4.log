@@ -1,0 +1,211 @@
+
+========== M4-INSERT : goodwill credit after an outage ==========
+
+1 row created.
+
+
+Commit complete.
+
+
+========== M4-UPDATE : tighten the overdraft policy ==========
+
+1 row updated.
+
+
+Commit complete.
+
+
+1 row updated.
+
+
+Commit complete.
+
+
+========== M4-DELETE : clear escrow, then a true delete ==========
+
+0 rows updated.
+
+
+Commit complete.
+
+
+1 row deleted.
+
+
+Rollback complete.
+
+
+========== M4-PROOF : attempts to tamper with the ledger ==========
+Blocked as designed -> ORA-20001: CREDIT_TXN is append-only. Insert a correcting PENALTY or RELEASE row instead of changing history.
+ORA-06512: at "TIMEBANK.TRG_TXN_IMMUTABLE", line 2
+ORA-04088: error during execution of
+trigger 'TIMEBANK.TRG_TXN_IMMUTABLE'
+
+PL/SQL procedure successfully completed.
+
+Blocked as designed -> ORA-20001: CREDIT_TXN is append-only. Insert a correcting PENALTY or RELEASE row instead of changing history.
+ORA-06512: at "TIMEBANK.TRG_TXN_IMMUTABLE", line 2
+ORA-04088: error during execution of
+trigger 'TIMEBANK.TRG_TXN_IMMUTABLE'
+
+PL/SQL procedure successfully completed.
+
+
+===== M4-Q1 : passbook for student 102 (SIMPLE) =====
+
+    TXN_ID POSTED_AT             TXN_TYPE      AMOUNT BALANCE_AFTER BOOKING
+---------- --------------------- --------- ---------- ------------- ----------------------------------------
+REMARKS
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        28 30-OCT 07:58          RELEASE            1           1.5 8
+Escrow returned on cancellation
+
+        27 30-OCT 07:58          HOLD              -1            .5 8
+Credits held in escrow for booking 8
+
+        13 30-OCT 07:58          HOLD            -1.5           1.5 1
+Credits held in escrow for booking 1
+
+         2 30-OCT 07:58          GRANT              3             3 -
+Starter grant on registration
+
+
+
+===== M4-Q2 : ledger with session context (OUTER JOIN) =====
+
+    TXN_ID STUDENT_NAME                                                                      TXN_TYPE      AMOUNT SUBJECT      SESSION_DATE    ORIGIN
+---------- --------------------------------------------------------------------------------- --------- ---------- ------------ --------------- --------------
+         1 Aarav Sharma                                                                      GRANT              3 n/a          no session      system credit
+         2 Diya Nair                                                                         GRANT              3 n/a          no session      system credit
+         3 Rohan Mehta                                                                       GRANT              3 n/a          no session      system credit
+         4 Ishita Rao                                                                        GRANT              3 n/a          no session      system credit
+         5 Kabir Singh                                                                       GRANT              3 n/a          no session      system credit
+         6 Ananya Iyer                                                                       GRANT              3 n/a          no session      system credit
+         7 Vivaan Joshi                                                                      GRANT              3 n/a          no session      system credit
+         8 Sara Khan                                                                         GRANT              3 n/a          no session      system credit
+         9 Arjun Patel                                                                       GRANT              3 n/a          no session      system credit
+        10 Riya Desai                                                                        GRANT              3 n/a          no session      system credit
+        11 Neel Verma                                                                        GRANT              3 n/a          no session      system credit
+        12 Meera Pillai                                                                      GRANT              3 n/a          no session      system credit
+        13 Diya Nair                                                                         HOLD            -1.5 BACSE202     19-OCT          session driven
+        14 Aarav Sharma                                                                      TRANSFER         1.5 BACSE202     19-OCT          session driven
+        15 Ishita Rao                                                                        HOLD              -1 BMAT201      22-OCT          session driven
+        16 Arjun Patel                                                                       TRANSFER           1 BMAT201      22-OCT          session driven
+        17 Ananya Iyer                                                                       HOLD              -2 BACSE203     21-OCT          session driven
+        18 Vivaan Joshi                                                                      TRANSFER           2 BACSE203     21-OCT          session driven
+        19 Riya Desai                                                                        HOLD              -1 BACSE202     20-OCT          session driven
+        20 Rohan Mehta                                                                       TRANSFER           1 BACSE202     20-OCT          session driven
+        21 Meera Pillai                                                                      HOLD            -1.5 BACSE201     19-OCT          session driven
+        22 Kabir Singh                                                                       TRANSFER         1.5 BACSE201     19-OCT          session driven
+        23 Kabir Singh                                                                       HOLD              -1 BPHY101      23-OCT          session driven
+        24 Neel Verma                                                                        TRANSFER           1 BPHY101      23-OCT          session driven
+        25 Arjun Patel                                                                       HOLD              -1 BACSE301     21-OCT          session driven
+        26 Aarav Sharma                                                                      TRANSFER           1 BACSE301     21-OCT          session driven
+        27 Diya Nair                                                                         HOLD              -1 BACSE204     23-OCT          session driven
+        28 Diya Nair                                                                         RELEASE            1 BACSE204     23-OCT          session driven
+        29 Ishita Rao                                                                        HOLD            -1.5 BACSE204     24-OCT          session driven
+        30 Ishita Rao                                                                        RELEASE          1.5 BACSE204     24-OCT          session driven
+        31 Vivaan Joshi                                                                      PENALTY           -1 n/a          no session      system credit
+        32 Ananya Iyer                                                                       HOLD              -1 BMEE201      12-NOV          session driven
+        33 Riya Desai                                                                        HOLD              -2 BACSE202     03-NOV          session driven
+        34 Meera Pillai                                                                      HOLD              -1 BACSE202     02-NOV          session driven
+        35 Tanvi Krishnan                                                                    GRANT              3 n/a          no session      system credit
+        36 Sara Khan                                                                         HOLD            -1.5 BACSE204     06-NOV          session driven
+        37 Ananya Iyer                                                                       GRANT              1 n/a          no session      system credit
+
+37 rows selected.
+
+
+===== M4-Q3 : who gives and who takes (NESTED) =====
+
+STUDENT_NAME                                                                      CREDITS_IN CREDITS_OUT    BALANCE STANDING
+--------------------------------------------------------------------------------- ---------- ----------- ---------- ---------
+Aarav Sharma                                                                             5.5           0        5.5 NET GIVER
+Vivaan Joshi                                                                               5          -1          4 NET GIVER
+Neel Verma                                                                                 4           0          4 NET GIVER
+Rohan Mehta                                                                                4           0          4 NET GIVER
+Kabir Singh                                                                              4.5          -1        3.5 NET GIVER
+Arjun Patel                                                                                4          -1          3 balanced
+Tanvi Krishnan                                                                             3           0          3 balanced
+Ishita Rao                                                                               4.5        -2.5          2 balanced
+Sara Khan                                                                                  3        -1.5        1.5 balanced
+Diya Nair                                                                                  4        -2.5        1.5 balanced
+Ananya Iyer                                                                                4          -3          1 balanced
+Meera Pillai                                                                               3        -2.5         .5 NET TAKER
+Riya Desai                                                                                 3          -3          0 NET TAKER
+
+13 rows selected.
+
+
+===== M4-Q4 : ledger tamper check (CORRELATED) -- expect 0 rows =====
+
+no rows selected
+
+
+===== M4-Q5 : closed-economy audit (AGGREGATE) =====
+
+TXN_KIND        ROWS_POSTED NET_CREDITS   SMALLEST    LARGEST
+--------------- ----------- ----------- ---------- ----------
+GRANT                    14          40          1          3
+HOLD                     13         -17         -2         -1
+PENALTY                   1          -1         -1         -1
+RELEASE                   2         2.5          1        1.5
+TRANSFER                  7           9          1          2
+** ALL TYPES **          37        33.5         -2          3
+
+6 rows selected.
+
+
+--- the balance equation itself
+
+ALL_BALANCES  IN_ESCROW GRANTS_LESS_PENALTIES      DRIFT VERDICT
+------------ ---------- --------------------- ---------- --------------
+        33.5        5.5                    39          0 BALANCED
+
+
+===== M4-Q6 : recomputed running balance (ANALYTIC) =====
+
+STUDENT                                      TXN_ID TXN_TYPE      AMOUNT RECOMPUTED     STORED CHECK_RE PREVIOUS_ OPENING_GRANT
+---------------------------------------- ---------- --------- ---------- ---------- ---------- -------- --------- -------------
+Aarav                                             1 GRANT              3          3          3 ok                             3
+Aarav                                            14 TRANSFER         1.5        4.5        4.5 ok       GRANT                 3
+Aarav                                            26 TRANSFER           1        5.5        5.5 ok       TRANSFER              3
+Diya                                              2 GRANT              3          3          3 ok                             3
+Diya                                             13 HOLD            -1.5        1.5        1.5 ok       GRANT                 3
+Diya                                             27 HOLD              -1         .5         .5 ok       HOLD                  3
+Diya                                             28 RELEASE            1        1.5        1.5 ok       HOLD                  3
+Rohan                                             3 GRANT              3          3          3 ok                             3
+Rohan                                            20 TRANSFER           1          4          4 ok       GRANT                 3
+Ishita                                            4 GRANT              3          3          3 ok                             3
+Ishita                                           15 HOLD              -1          2          2 ok       GRANT                 3
+Ishita                                           29 HOLD            -1.5         .5         .5 ok       HOLD                  3
+Ishita                                           30 RELEASE          1.5          2          2 ok       HOLD                  3
+Kabir                                             5 GRANT              3          3          3 ok                             3
+Kabir                                            22 TRANSFER         1.5        4.5        4.5 ok       GRANT                 3
+Kabir                                            23 HOLD              -1        3.5        3.5 ok       TRANSFER              3
+Ananya                                            6 GRANT              3          3          3 ok                             3
+Ananya                                           17 HOLD              -2          1          1 ok       GRANT                 3
+Ananya                                           32 HOLD              -1          0          0 ok       HOLD                  3
+Ananya                                           37 GRANT              1          1          1 ok       HOLD                  3
+Vivaan                                            7 GRANT              3          3          3 ok                             3
+Vivaan                                           18 TRANSFER           2          5          5 ok       GRANT                 3
+Vivaan                                           31 PENALTY           -1          4          4 ok       TRANSFER              3
+Sara                                              8 GRANT              3          3          3 ok                             3
+Sara                                             36 HOLD            -1.5        1.5        1.5 ok       GRANT                 3
+Arjun                                             9 GRANT              3          3          3 ok                             3
+Arjun                                            16 TRANSFER           1          4          4 ok       GRANT                 3
+Arjun                                            25 HOLD              -1          3          3 ok       TRANSFER              3
+Riya                                             10 GRANT              3          3          3 ok                             3
+Riya                                             19 HOLD              -1          2          2 ok       GRANT                 3
+Riya                                             33 HOLD              -2          0          0 ok       HOLD                  3
+Neel                                             11 GRANT              3          3          3 ok                             3
+Neel                                             24 TRANSFER           1          4          4 ok       GRANT                 3
+Meera                                            12 GRANT              3          3          3 ok                             3
+Meera                                            21 HOLD            -1.5        1.5        1.5 ok       GRANT                 3
+Meera                                            34 HOLD              -1         .5         .5 ok       HOLD                  3
+Tanvi                                            35 GRANT              3          3          3 ok                             3
+
+37 rows selected.
+
+
+===== MEMBER 4 COMPLETE : 3 DML + 6 SELECT = 9 queries =====

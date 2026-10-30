@@ -1,0 +1,165 @@
+
+========== M2-INSERT : a student becomes a tutor ==========
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+Commit complete.
+
+
+========== M2-UPDATE : promote proven tutors to EXPERT ==========
+
+0 rows updated.
+
+
+Commit complete.
+
+
+========== M2-DELETE : withdraw an unused slot ==========
+
+1 row deleted.
+
+
+Commit complete.
+
+
+===== M2-Q1 : subject catalogue (SIMPLE) =====
+
+SUBJECT_ID SUBJECT_CODE SUBJECT_NAME                                                           CATEGORY     OWNED_BY
+---------- ------------ ---------------------------------------------------------------------- ------------ ------------------------------------------------------------
+       103 BACSE201     Theory of Computation                                                  CORE         SCOPE
+       101 BACSE202     Database Systems                                                       CORE         SCOPE
+       102 BACSE203     Data Communications and Networking                                     CORE         SCOPE
+       110 BACSE204     Operating Systems                                                      CORE         SCOPE
+       108 BACSE301     Design and Analysis of Algorithms                                      CORE         SCOPE
+       107 BEEE202      Signals and Systems                                                    CORE         SELECT
+       104 BMAT201      Probability and Statistics                                             CORE         SAS
+       106 BMEE201      Engineering Thermodynamics                                             CORE         SMEC
+       105 BPHY101      Engineering Physics                                                    CORE         SAS
+       109 BMGT101      Principles of Management                                               ELECTIVE     VITBS
+
+10 rows selected.
+
+
+===== M2-Q2 : skill matrix, incl. cross-department (JOIN) =====
+
+TUTOR_NAME                                                                        TUTOR_SCHOOL                                                 SUBJECT_CODE
+--------------------------------------------------------------------------------- ------------------------------------------------------------ ------------
+SUBJECT_NAME                                                           SUBJECT_SCHOOL                                               COMPETENCY_L GR NOTE
+---------------------------------------------------------------------- ------------------------------------------------------------ ------------ -- ----------------
+Arjun Patel                                                                       SCOPE                                                        BMAT201
+Probability and Statistics                                             SAS                                                          PROFICIENT   B  CROSS-DEPARTMENT
+
+Neel Verma                                                                        SMEC                                                         BPHY101
+Engineering Physics                                                    SAS                                                          PROFICIENT   A  CROSS-DEPARTMENT
+
+Rohan Mehta                                                                       SMEC                                                         BACSE202
+Database Systems                                                       SCOPE                                                        PROFICIENT   A  CROSS-DEPARTMENT
+
+Aarav Sharma                                                                      SCOPE                                                        BACSE202
+Database Systems                                                       SCOPE                                                        EXPERT       S  own department
+
+Aarav Sharma                                                                      SCOPE                                                        BACSE301
+Design and Analysis of Algorithms                                      SCOPE                                                        PROFICIENT   A  own department
+
+Arjun Patel                                                                       SCOPE                                                        BACSE202
+Database Systems                                                       SCOPE                                                        EXPERT       S  own department
+
+Kabir Singh                                                                       SCOPE                                                        BACSE201
+Theory of Computation                                                  SCOPE                                                        EXPERT       S  own department
+
+Kabir Singh                                                                       SCOPE                                                        BACSE204
+Operating Systems                                                      SCOPE                                                        PROFICIENT   A  own department
+
+Meera Pillai                                                                      SELECT                                                       BEEE202
+Signals and Systems                                                    SELECT                                                       EXPERT       S  own department
+
+Neel Verma                                                                        SMEC                                                         BMEE201
+Engineering Thermodynamics                                             SMEC                                                         PROFICIENT   B  own department
+
+Rohan Mehta                                                                       SMEC                                                         BMEE201
+Engineering Thermodynamics                                             SMEC                                                         EXPERT       S  own department
+
+Vivaan Joshi                                                                      SCOPE                                                        BACSE203
+Data Communications and Networking                                     SCOPE                                                        EXPERT       S  own department
+
+Vivaan Joshi                                                                      SCOPE                                                        BACSE204
+Operating Systems                                                      SCOPE                                                        EXPERT       S  own department
+
+
+13 rows selected.
+
+
+===== M2-Q3 : subjects with no tutor (NESTED) =====
+
+SUBJECT_CODE SUBJECT_NAME                                                           CATEGORY     OWNING_SCHOOL                                                TIMES_REQUESTED
+------------ ---------------------------------------------------------------------- ------------ ------------------------------------------------------------ ---------------
+BMGT101      Principles of Management                                               ELECTIVE     VITBS                                                                      0
+
+
+===== M2-Q4 : unbooked slots next week (CORRELATED) =====
+
+TUTOR_NAME                                                                           SLOT_NO DAY START_TIME   END_TIME HOURS_FREE NEXT_OCCU
+--------------------------------------------------------------------------------- ---------- --- ---------- ---------- ---------- ---------
+Kabir Singh                                                                                1 MON         18         20          2 02-NOV-26
+Rohan Mehta                                                                                1 TUE         10         12          2 03-NOV-26
+Meera Pillai                                                                               1 TUE         16         18          2 03-NOV-26
+Aarav Sharma                                                                               2 WED         14         16          2 04-NOV-26
+Vivaan Joshi                                                                               1 WED         16         18          2 04-NOV-26
+Arjun Patel                                                                                2 THU         10         12          2 05-NOV-26
+Kabir Singh                                                                                2 FRI         14         16          2 06-NOV-26
+Neel Verma                                                                                 1 FRI         16         18          2 06-NOV-26
+Meera Pillai                                                                               2 SAT          9         11          2 07-NOV-26
+Vivaan Joshi                                                                               2 SAT         10         12          2 07-NOV-26
+
+10 rows selected.
+
+
+===== M2-Q5 : capacity versus demand (AGGREGATE) =====
+
+SUBJECT_CODE SUBJECT_NAME                                                           TUTORS_AVAILABLE    EXPERTS FIRST_CER TOTAL_BOOKINGS LOAD_PER_TUTOR
+------------ ---------------------------------------------------------------------- ---------------- ---------- --------- -------------- --------------
+BACSE202     Database Systems                                                                      3          2 03-JAN-26              4           1.33
+BACSE204     Operating Systems                                                                     2          1 12-FEB-26              2              1
+BMAT201      Probability and Statistics                                                            1          0 03-APR-26              1              1
+BACSE201     Theory of Computation                                                                 1          1 02-FEB-26              1              1
+BACSE203     Data Communications and Networking                                                    1          1 04-MAR-26              1              1
+BPHY101      Engineering Physics                                                                   1          0 13-APR-26              1              1
+BACSE301     Design and Analysis of Algorithms                                                     1          0 22-FEB-26              1              1
+BMEE201      Engineering Thermodynamics                                                            2          1 13-JAN-26              1             .5
+BEEE202      Signals and Systems                                                                   1          1 30-OCT-26              0              0
+
+9 rows selected.
+
+
+===== M2-Q6 : tutor ranking within each subject (ANALYTIC) =====
+
+SUBJECT_CODE TUTOR_NAME                                                                        COMPETENCY_L GR RANK_IN_SUBJECT TUTORS_IN_SUBJECT LEVEL_ABOVE  TOP_TUTOR
+------------ --------------------------------------------------------------------------------- ------------ -- --------------- ----------------- ------------ ----------------------------------------
+BACSE201     Kabir Singh                                                                       EXPERT       S                1                 1              Kabir
+BACSE202     Aarav Sharma                                                                      EXPERT       S                1                 3 PROFICIENT   Aarav
+BACSE202     Arjun Patel                                                                       EXPERT       S                1                 3 EXPERT       Aarav
+BACSE202     Rohan Mehta                                                                       PROFICIENT   A                3                 3              Aarav
+BACSE203     Vivaan Joshi                                                                      EXPERT       S                1                 1              Vivaan
+BACSE204     Vivaan Joshi                                                                      EXPERT       S                1                 2 PROFICIENT   Vivaan
+BACSE204     Kabir Singh                                                                       PROFICIENT   A                2                 2              Vivaan
+BACSE301     Aarav Sharma                                                                      PROFICIENT   A                1                 1              Aarav
+BEEE202      Meera Pillai                                                                      EXPERT       S                1                 1              Meera
+BMAT201      Arjun Patel                                                                       PROFICIENT   B                1                 1              Arjun
+BMEE201      Rohan Mehta                                                                       EXPERT       S                1                 2 PROFICIENT   Rohan
+BMEE201      Neel Verma                                                                        PROFICIENT   B                2                 2              Rohan
+BPHY101      Neel Verma                                                                        PROFICIENT   A                1                 1              Neel
+
+13 rows selected.
+
+
+===== MEMBER 2 COMPLETE : 3 DML + 6 SELECT = 9 queries =====

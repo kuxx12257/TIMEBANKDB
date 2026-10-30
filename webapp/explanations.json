@@ -1,0 +1,268 @@
+{
+"M1-INSERT": [
+"Registers a new student (Tanvi) using the procedure pkg_timebank.enrol_student.",
+"One transaction does 2 writes: the STUDENT row + a starter GRANT of 3 credits in CREDIT_TXN.",
+"So a student can never exist without credits (TOTAL participation in 'posts').",
+"Her 2 phone numbers go into STUDENT_PHONE: PhoneNo is a MULTIVALUED attribute -> own table."
+],
+"M1-UPDATE": [
+"Closes Sara's account by setting account_status = 'INACTIVE' (a SOFT delete), then restores it.",
+"Why not DELETE? BOOKING and CREDIT_TXN reference STUDENT with no ON DELETE clause,",
+"so Oracle would block the delete to protect session history and the ledger."
+],
+"M1-DELETE": [
+"Deletes one of Aarav's two phone numbers.",
+"This is a safe, real DELETE: STUDENT_PHONE came from a multivalued attribute and no table references it."
+],
+"M1-Q1": [
+"SIMPLE query: the student directory.",
+"AGE is a DERIVED attribute - it is NOT stored. It is calculated from DOB:",
+"FLOOR(MONTHS_BETWEEN(SYSDATE, dob)/12)."
+],
+"M1-Q2": [
+"*** MOST IMPORTANT QUERY OF MEMBER 1 *** - a 4-table JOIN with two LEFT JOINs.",
+"It labels every student: TUTOR ONLY / TUTEE ONLY / BOTH / NEITHER YET.",
+"BOTH (Kabir, Arjun) proves the specialization is OVERLAPPING.",
+"NEITHER YET (Sara) proves it is PARTIAL. So we used mapping option 8A (superclass + subclass tables).",
+"LEFT JOIN is required - an INNER JOIN would hide students missing from a subclass."
+],
+"M1-Q3": [
+"NESTED (non-correlated) subquery: students whose balance is below the campus average.",
+"The inner subquery does not use the outer row, so Oracle runs it only ONCE."
+],
+"M1-Q4": [
+"CORRELATED subquery: joined more than 30 days ago but never booked a session.",
+"NOT EXISTS uses s.student_id from the outer query, so it is re-run for EVERY outer row."
+],
+"M1-Q5": [
+"AGGREGATE with GROUP BY and HAVING: a department scoreboard.",
+"WHERE filters ROWS before grouping; HAVING filters GROUPS after grouping (it can use COUNT)."
+],
+"M1-Q6": [
+"ANALYTIC (window) functions: rank students by credit balance inside their department.",
+"RANK, DENSE_RANK, PERCENT_RANK, NTILE, LAG with PARTITION BY department.",
+"Unlike GROUP BY, window functions keep EVERY row and add the rank beside it."
+],
+"M2-INSERT": [
+"Meera becomes a tutor: insert into TUTOR, then TUTOR_SKILL, then 2 SLOT rows.",
+"The order is forced by foreign keys (a TUTOR must exist before its skills and slots).",
+"Meera was already a tutee - now she is in BOTH subclasses (overlapping).",
+"Her slot_no starts again at 1: slot_no is the PARTIAL KEY of the WEAK entity SLOT."
+],
+"M2-UPDATE": [
+"Promotes a tutor to EXPERT in a subject if they have >= 2 completed sessions in it",
+"AND an average rating >= 4.0. Uses two CORRELATED subqueries inside the WHERE clause.",
+"Only ratings written by the TUTEE are counted (a booking has two reviews, one from each side).",
+"'0 rows updated' is a correct result on this data: nobody has met the bar yet."
+],
+"M2-DELETE": [
+"Removes a slot Neel no longer offers (his Saturday slot).",
+"The NOT EXISTS guard checks no booking uses it - otherwise the COMPOSITE foreign key",
+"(tutor_id, slot_no) from BOOKING would raise ORA-02292 'child record found'."
+],
+"M2-Q1": [
+"SIMPLE query: the subject catalogue with the department that owns each subject."
+],
+"M2-Q2": [
+"5-table JOIN: the skill matrix - which tutor can teach which subject.",
+"TUTOR_SKILL is the table made from the M:N relationship 'offers' (it has its own attributes).",
+"DEPARTMENT is joined TWICE with different aliases (tutor's dept and subject's dept).",
+"Shows CROSS-DEPARTMENT tutoring: Rohan is Mechanical but teaches Database Systems."
+],
+"M2-Q3": [
+"NESTED subquery with NOT IN: subjects that nobody teaches (coverage gaps).",
+"This is the PARTIAL participation of SUBJECT in 'offers'.",
+"NOT IN is safe only because tutor_skill.subject_id is NOT NULL (one NULL would return no rows)."
+],
+"M2-Q4": [
+"CORRELATED subquery: published slots that nobody has booked for next week.",
+"The NOT EXISTS correlates on THREE things: tutor_id, slot_no and the computed date."
+],
+"M2-Q5": [
+"AGGREGATE with GROUP BY / HAVING: teaching capacity vs demand per subject.",
+"COUNT(DISTINCT tutor_id) avoids counting the same tutor twice."
+],
+"M2-Q6": [
+"ANALYTIC functions: rank tutors inside each subject (best first).",
+"RANK, COUNT() OVER, LAG and FIRST_VALUE with PARTITION BY subject."
+],
+"M3-INSERT": [
+"Sara (who was in NEITHER subclass) becomes a TUTEE, then books Kabir's Friday slot.",
+"pkg_timebank.book_session does 5 steps atomically:",
+"  1 lock the slot row (SELECT ... FOR UPDATE)  2 check it is free  3 check the pair weekly cap",
+"  4 INSERT the booking  5 move credits to escrow (HOLD -1.5 in the ledger).",
+"Triggers check the overdraft floor and the slot time; the composite FKs check slot+subject belong to the tutor.",
+"Note the SESSION CODE printed - only the tutee gets it."
+],
+"M3-UPDATE": [
+"Reschedules the earliest upcoming booking by one week.",
+"A correlated NOT EXISTS makes sure the new date is free, so rescheduling cannot double-book."
+],
+"M3-DELETE": [
+"Purges old REQUESTED bookings that have no ledger rows.",
+"'0 rows deleted' is correct here. CONFIRMED/COMPLETED bookings can NEVER be deleted",
+"because CREDIT_TXN references them - deleting would orphan money."
+],
+"M3-Q1": [
+"SIMPLE query: upcoming sessions.",
+"Start time is stored as decimal hours (16.5 = 16:30); dividing by 24 turns it into a clock time."
+],
+"M3-Q2": [
+"6-table JOIN: the complete session sheet (tutee, tutor, subject, slot, status).",
+"Every join rebuilds one ER relationship from its foreign key.",
+"The SLOT join uses BOTH tutor_id AND slot_no because SLOT is a weak entity (composite key)."
+],
+"M3-Q3": [
+"NESTED subquery with NOT IN: tutors with a completely free diary next week."
+],
+"M3-Q4": [
+"CORRELATED subquery: tutors busier than the average tutor.",
+"This one statement contains BOTH kinds: the correlated one (uses t.student_id, runs per tutor)",
+"and a non-correlated one (campus average, runs once)."
+],
+"M3-Q5": [
+"AGGREGATE with GROUP BY / HAVING: booking funnel per subject.",
+"SUM(CASE WHEN ... THEN 1 ELSE 0 END) = conditional aggregation (pivots status into columns)."
+],
+"M3-Q6": [
+"ANALYTIC functions: each tutor's sessions with a RUNNING TOTAL of hours.",
+"SUM() OVER (... ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), ROW_NUMBER, RATIO_TO_REPORT.",
+"GROUP BY would give only the total; window functions show total AND each session."
+],
+"M4-INSERT": [
+"Inserts a goodwill GRANT of +1 credit for Ananya directly into the ledger.",
+"balance_snapshot is computed inside the same statement (balance before + amount).",
+"booking_id is NULL - it is the ONLY nullable foreign key in the schema",
+"(partial participation of CREDIT_TXN in 'generates': grants have no session)."
+],
+"M4-UPDATE": [
+"Tightens the overdraft rule from -5 to -4 credits in CREDIT_POLICY, then restores it.",
+"Rules live in a table (an index-organised table), so changing a rule needs no code change.",
+"The trigger trg_credit_floor reads this value on every booking."
+],
+"M4-DELETE": [
+"Clears stale escrow values on finished bookings (kept with COMMIT),",
+"then DELETEs a policy row and immediately ROLLBACKs - showing a delete can be undone",
+"before COMMIT."
+],
+"M4-PROOF": [
+"*** SCREENSHOT THIS *** Two attempts to tamper with the ledger:",
+"an UPDATE and a DELETE on CREDIT_TXN. Both MUST fail with ORA-20001.",
+"The trigger trg_txn_immutable makes the ledger APPEND-ONLY (like real accounting)."
+],
+"M4-Q1": [
+"SIMPLE query: the passbook of student 102 (Diya), newest first.",
+"GRANT +3, then HOLDs (negative) when she booked, RELEASE when a booking was cancelled.",
+"Uses the index idx_txn_student_time (student_id, txn_timestamp)."
+],
+"M4-Q2": [
+"JOIN with LEFT OUTER JOIN: each ledger row with the session that caused it.",
+"Must be OUTER: booking_id is NULL for GRANT/PENALTY rows, an INNER join would drop them."
+],
+"M4-Q3": [
+"NESTED subquery in the FROM clause (inline view): net givers vs net takers.",
+"The inner query totals the ledger per student; the outer query classifies them."
+],
+"M4-Q4": [
+"CORRELATED subquery = TAMPER CHECK. Every snapshot must equal previous snapshot + amount.",
+"EXPECTED RESULT: 'no rows selected'. No rows = the ledger has never been edited = PASS."
+],
+"M4-Q5": [
+"*** THE CLOSED-ECONOMY AUDIT *** (most important query of the project)",
+"First a GROUPING SETS summary per transaction type with a grand total,",
+"then the equation:  all balances + escrow  =  grants - penalties.",
+"VERDICT must say BALANCED (drift 0): no credits were created or lost."
+],
+"M4-Q6": [
+"ANALYTIC functions: rebuild each student's running balance with SUM() OVER",
+"and compare it with the stored balance_snapshot. Every row should say 'ok'."
+],
+"M5-INSERT": [
+"(a) Adds the tutor review that one completed booking never got.",
+"    The trigger allows feedback only on COMPLETED sessions; the PK (booking_id, reviewer_role)",
+"    stops anyone reviewing the same session twice.",
+"(b) Raises a dispute on the first CONFIRMED booking -> booking becomes DISPUTED, escrow is frozen.",
+"    dispute_no is a PARTIAL KEY (restarts at 1 for every booking) - DISPUTE is a weak entity."
+],
+"M5-UPDATE": [
+"Triages disputes older than 2 days: status UNDER_REVIEW, assigned to the least-busy admin.",
+"'0 rows updated' is correct now - the dispute was raised just a moment ago."
+],
+"M5-DELETE": [
+"(a) Tutors retract their recent 4.0 reviews (written in the last 7 days, no dispute) - 3 rows.",
+"    Naming (booking_id, reviewer_role) identifies exactly one review - no extra review id needed.",
+"(b) Deletes ratings from pairs who tutor each other (possible collusion).",
+"    0 rows in (b) is correct: our data has no colluding pairs."
+],
+"M5-Q1": [
+"SIMPLE query with UNION ALL: reviews and disputes listed together.",
+"UNION ALL (not UNION) because no duplicates are possible and it avoids a sort."
+],
+"M5-Q2": [
+"SELF JOIN: FEEDBACK is joined to itself twice - once for the tutee's review, once for the tutor's.",
+"Possible only because reviewer_role is part of the primary key.",
+"OUTER joins, because many sessions have only one review or none."
+],
+"M5-Q3": [
+"NESTED subquery, 3 levels: tutors rated above the campus average.",
+"Campus average = average of each tutor's average (so busy tutors do not dominate)."
+],
+"M5-Q4": [
+"CORRELATED subquery: CREDIT-LOOP COLLUSION detector - two students who keep tutoring each other.",
+"'no rows selected' = no suspicious pairs in our data (that is the good result).",
+"A database cannot stop two people who agree to lie, but it can make the pattern visible."
+],
+"M5-Q5": [
+"AGGREGATE with ROLLUP: rating distribution per subject plus an ALL SUBJECTS total row.",
+"STDDEV shows the spread; GROUPING() detects the total row."
+],
+"M5-Q6": [
+"ANALYTIC functions: is each tutor improving or slipping?",
+"LAG (previous rating), moving average of last 3, DENSE_RANK and NTILE across campus."
+],
+"A1": [
+"TCL demo: SAVEPOINT, ROLLBACK TO SAVEPOINT, and full ROLLBACK on Ishita's balance.",
+"Add +2 goodwill, set a savepoint, add a wrong -2 penalty, ROLLBACK TO the savepoint:",
+"only the penalty is undone. Then a full ROLLBACK undoes everything."
+],
+"A2": [
+"ATOMICITY (the A in ACID): a booking that fails (tutor 101 has no slot 9)",
+"leaves NO trace - the ledger row count is the same before and after."
+],
+"PART B": [
+"CONCURRENCY demo is done separately with two windows:",
+"run 8_CONCURRENCY_SESSION1.bat, then 9_CONCURRENCY_SESSION2.bat (it hangs),",
+"then type COMMIT; in window 1 - window 2 fails with ORA-20005. Only one booking exists."
+],
+"C1": [
+"EXPLAIN PLAN for 'find tutors of subject 101' - WITH the index.",
+"Look for INDEX RANGE SCAN and note the COST."
+],
+"C2": [
+"The same query with the /*+ FULL */ hint, which forces Oracle to ignore the index.",
+"Look for TABLE ACCESS FULL and compare the COST with C1."
+],
+"C3": [
+"Heuristic optimisation: selection is pushed down - FEEDBACK is filtered BEFORE the joins,",
+"so fewer rows are joined. (Relational algebra is written in the file comments.)"
+],
+"C4": [
+"INDEX-ONLY scan: the answer comes from the index alone.",
+"There is no TABLE ACCESS step - the table itself is never read."
+],
+"PART D": [
+"Final closed-economy audit with pkg_timebank.audit_economy - must print BALANCED."
+],
+"E1": [
+"Module 6: tutor leaderboard using a CTE (WITH clause) + DENSE_RANK, PERCENT_RANK, NTILE, LEAD."
+],
+"E2": [
+"Module 6, GRAPH query without a graph database: CONNECT BY walks 'who learned from whom'.",
+"Starts at Diya: she learned from Aarav (Aarav never booked anyone, so the chain ends there).",
+"NOCYCLE stops infinite loops if two students taught each other (otherwise ORA-01436)."
+],
+"E3": [
+"ROLLUP: how much tutoring crosses department boundaries (with subtotals and grand total).",
+"This is why DEPARTMENT is in the model at all."
+]
+}

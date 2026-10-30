@@ -1,0 +1,139 @@
+
+========== M3-INSERT : book a session ==========
+
+1 row created.
+
+
+1 row created.
+
+Booking 13 created.
+Session code for the TUTEE only: LYIVA3VO
+Sara's balance is now 1.5
+
+PL/SQL procedure successfully completed.
+
+
+========== M3-UPDATE : reschedule by one week ==========
+
+1 row updated.
+
+
+Commit complete.
+
+
+========== M3-DELETE : purge abandoned requests ==========
+
+0 rows deleted.
+
+
+Commit complete.
+
+
+===== M3-Q1 : upcoming sessions (SIMPLE) =====
+
+BOOKING_ID ON_DATE                           START ENDS  DURATION_HOURS SESSION VENUE                                                        STATUS     CREDITS_HELD
+---------- --------------------------------- ----- ----- -------------- ------- ------------------------------------------------------------ ---------- ------------
+        12 MON 02-NOV-2026                   16:00 17:00              1 OFFLINE SJT 512                                                      CONFIRMED             1
+        11 TUE 03-NOV-2026                   14:00 16:00              2 ONLINE  Google Meet                                                  CONFIRMED             2
+        13 FRI 06-NOV-2026                   14:00 15:30            1.5 ONLINE  MS Teams                                                     CONFIRMED           1.5
+        10 THU 12-NOV-2026                   16:00 17:00              1 OFFLINE MB 204 (rescheduled)                                         CONFIRMED             1
+
+
+===== M3-Q2 : complete session sheet (SIX-TABLE JOIN) =====
+
+BOOKING_ID TUTEE_NAME                                                                        TUTOR_NAME                                                                        SUBJECT_CODE
+---------- --------------------------------------------------------------------------------- --------------------------------------------------------------------------------- ------------
+TUTOR_SLOT                                                                            SESSION_DATE           HRS STATUS     CHECK_IN              CON
+------------------------------------------------------------------------------------- --------------- ---------- ---------- --------------------- ---
+         1 Diya Nair                                                                         Aarav Sharma                                                                      BACSE202
+MON 16-18                                                                             19-OCT                 1.5 COMPLETED  30-OCT 07:58          Y/Y
+
+         2 Ishita Rao                                                                        Arjun Patel                                                                       BMAT201
+THU 10-12                                                                             22-OCT                   1 COMPLETED  30-OCT 07:58          Y/Y
+
+         3 Ananya Iyer                                                                       Vivaan Joshi                                                                      BACSE203
+WED 16-18                                                                             21-OCT                   2 COMPLETED  30-OCT 07:58          Y/Y
+
+         4 Riya Desai                                                                        Rohan Mehta                                                                       BACSE202
+TUE 10-12                                                                             20-OCT                   1 COMPLETED  30-OCT 07:58          Y/Y
+
+         5 Meera Pillai                                                                      Kabir Singh                                                                       BACSE201
+MON 18-20                                                                             19-OCT                 1.5 COMPLETED  30-OCT 07:58          Y/Y
+
+         6 Kabir Singh                                                                       Neel Verma                                                                        BPHY101
+FRI 16-18                                                                             23-OCT                   1 COMPLETED  30-OCT 07:58          Y/Y
+
+         7 Arjun Patel                                                                       Aarav Sharma                                                                      BACSE301
+WED 14-16                                                                             21-OCT                   1 COMPLETED  30-OCT 07:58          Y/Y
+
+         8 Diya Nair                                                                         Kabir Singh                                                                       BACSE204
+FRI 14-16                                                                             23-OCT                   1 CANCELLED  not checked in        N/N
+
+         9 Ishita Rao                                                                        Vivaan Joshi                                                                      BACSE204
+SAT 10-12                                                                             24-OCT                 1.5 CANCELLED  not checked in        N/N
+
+        10 Ananya Iyer                                                                       Rohan Mehta                                                                       BMEE201
+THU 16-18                                                                             12-NOV                   1 CONFIRMED  not checked in        N/N
+
+        11 Riya Desai                                                                        Arjun Patel                                                                       BACSE202
+TUE 14-16                                                                             03-NOV                   2 CONFIRMED  not checked in        N/N
+
+        12 Meera Pillai                                                                      Aarav Sharma                                                                      BACSE202
+MON 16-18                                                                             02-NOV                   1 CONFIRMED  not checked in        N/N
+
+        13 Sara Khan                                                                         Kabir Singh                                                                       BACSE204
+FRI 14-16                                                                             06-NOV                 1.5 CONFIRMED  not checked in        N/N
+
+
+13 rows selected.
+
+
+===== M3-Q3 : tutors free all next week (NESTED) =====
+
+TUTOR_NAME                                                                        BADGE_LEVE SLOTS_PUBLISHED SUBJECTS_OFFERED
+--------------------------------------------------------------------------------- ---------- --------------- ----------------
+Rohan Mehta                                                                       BRONZE                   2                2
+Meera Pillai                                                                      BRONZE                   2                1
+Vivaan Joshi                                                                      BRONZE                   2                2
+Neel Verma                                                                        BRONZE                   1                2
+
+
+===== M3-Q4 : tutors busier than average (CORRELATED) =====
+
+TUTOR_NAME                                                                        SESSIONS_TOTAL CAMPUS_AVERAGE
+--------------------------------------------------------------------------------- -------------- --------------
+Aarav Sharma                                                                                   3           2.17
+
+
+===== M3-Q5 : booking funnel by subject (AGGREGATE) =====
+
+SUBJECT_CODE SUBJECT_NAME                                                                TOTAL  COMPLETED  CANCELLED   UPCOMING TOTAL_HOURS   PCT_DONE
+------------ ---------------------------------------------------------------------- ---------- ---------- ---------- ---------- ----------- ----------
+BACSE202     Database Systems                                                                4          2          0          2         5.5         50
+BACSE204     Operating Systems                                                               3          0          2          1           4          0
+BACSE201     Theory of Computation                                                           1          1          0          0         1.5        100
+BACSE203     Data Communications and Networking                                              1          1          0          0           2        100
+BACSE301     Design and Analysis of Algorithms                                               1          1          0          0           1        100
+BMAT201      Probability and Statistics                                                      1          1          0          0           1        100
+BMEE201      Engineering Thermodynamics                                                      1          0          0          1           1          0
+BPHY101      Engineering Physics                                                             1          1          0          0           1        100
+
+8 rows selected.
+
+
+===== M3-Q6 : running teaching load per tutor (ANALYTIC) =====
+
+TUTOR_NAME                                                                        BOOKING_ID SESSION_DATE           HRS SESSION_SEQ RUNNING_HOURS THEIR_TOTAL PCT_OF_THEIR_LOAD
+--------------------------------------------------------------------------------- ---------- --------------- ---------- ----------- ------------- ----------- -----------------
+Aarav Sharma                                                                               1 19-OCT                 1.5           1           1.5         2.5                60
+Aarav Sharma                                                                               7 21-OCT                   1           2           2.5         2.5                40
+Arjun Patel                                                                                2 22-OCT                   1           1             1           1               100
+Kabir Singh                                                                                5 19-OCT                 1.5           1           1.5         1.5               100
+Neel Verma                                                                                 6 23-OCT                   1           1             1           1               100
+Rohan Mehta                                                                                4 20-OCT                   1           1             1           1               100
+Vivaan Joshi                                                                               3 21-OCT                   2           1             2           2               100
+
+7 rows selected.
+
+
+===== MEMBER 3 COMPLETE : 3 DML + 6 SELECT = 9 queries =====

@@ -1,0 +1,198 @@
+
+========== PART A : TCL ==========
+
+--- A1. SAVEPOINT and partial rollback
+Balance at the start      : 2
+After the goodwill credit : 4
+After the penalty         : 2
+After ROLLBACK TO savepoint: 4
+=> Correct: the penalty was undone, the credit kept.
+After full ROLLBACK        : 2
+
+PL/SQL procedure successfully completed.
+
+
+--- A2. Atomicity: a failed booking leaves no trace
+Ledger rows before : 37
+Rejected as expected -> ORA-20011: Tutor 101 has no slot number 9.
+Ledger rows after  : 37   (unchanged = atomic)
+
+PL/SQL procedure successfully completed.
+
+
+========== PART B : see the comments for the two-session demo ==========
+
+========== PART C : query plans ==========
+
+--- C1. Tutor search WITH the index (expect INDEX RANGE SCAN)
+
+Explained.
+
+
+PLAN_TABLE_OUTPUT
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 29923870
+
+------------------------------------------------------------------------------
+| Id  | Operation                           | Name              | Cost (%CPU)|
+------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT                    |                   |     0   (0)|
+|   1 |  TABLE ACCESS BY INDEX ROWID BATCHED| TUTOR_SKILL       |     0   (0)|
+|   2 |   INDEX RANGE SCAN                  | IDX_SKILL_SUBJECT |     0   (0)|
+------------------------------------------------------------------------------
+
+9 rows selected.
+
+
+--- C2. The same question WITHOUT the index (expect FULL scan)
+--- /*+ FULL */ forces the optimiser to ignore it, so the two
+--- costs can be compared directly.
+
+Explained.
+
+
+PLAN_TABLE_OUTPUT
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 3916332905
+
+------------------------------------------------------
+| Id  | Operation         | Name        | Cost (%CPU)|
+------------------------------------------------------
+|   0 | SELECT STATEMENT  |             |     2   (0)|
+|   1 |  TABLE ACCESS FULL| TUTOR_SKILL |     2   (0)|
+------------------------------------------------------
+
+8 rows selected.
+
+
+--- C3. Heuristic optimisation: pushing selection down the tree
+--- Both queries below return the same rows. The first filters
+--- early (good), the second joins everything then filters.
+
+Explained.
+
+
+PLAN_TABLE_OUTPUT
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 1098356583
+
+-------------------------------------------------------------------------
+| Id  | Operation                      | Name              | Cost (%CPU)|
+-------------------------------------------------------------------------
+|   0 | SELECT STATEMENT               |                   |     0   (0)|
+|   1 |  NESTED LOOPS                  |                   |     0   (0)|
+|   2 |   NESTED LOOPS                 |                   |     0   (0)|
+|   3 |    NESTED LOOPS                |                   |     0   (0)|
+|   4 |     VIEW                       | index$_join$_002  |     0   (0)|
+|   5 |      HASH JOIN                 |                   |            |
+|   6 |       INDEX FAST FULL SCAN     | IDX_BOOKING_SCHED |     0   (0)|
+|   7 |       INDEX FAST FULL SCAN     | PK_BOOKING        |     0   (0)|
+|   8 |     TABLE ACCESS BY INDEX ROWID| FEEDBACK          |     0   (0)|
+|   9 |      INDEX UNIQUE SCAN         | PK_FEEDBACK       |     0   (0)|
+|  10 |    INDEX UNIQUE SCAN           | PK_STUDENT        |     0   (0)|
+|  11 |   TABLE ACCESS BY INDEX ROWID  | STUDENT           |     0   (0)|
+-------------------------------------------------------------------------
+
+18 rows selected.
+
+
+--- C4. Index-only scan: the answer comes from the index alone
+--- Look for "INDEX FAST FULL SCAN" and the absence of any
+--- TABLE ACCESS step -- the table is never touched.
+
+Explained.
+
+
+PLAN_TABLE_OUTPUT
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 2718051468
+
+---------------------------------------------------------------
+| Id  | Operation            | Name              | Cost (%CPU)|
+---------------------------------------------------------------
+|   0 | SELECT STATEMENT     |                   |     0   (0)|
+|   1 |  SORT GROUP BY NOSORT|                   |     0   (0)|
+|   2 |   INDEX FULL SCAN    | IDX_SKILL_SUBJECT |     0   (0)|
+---------------------------------------------------------------
+
+9 rows selected.
+
+
+========== PART D : final audit ==========
+--------------------------------------------
+CLOSED ECONOMY AUDIT
+--------------------------------------------
+Sum of all balances  : 33.5
+Held in escrow       : 5.5
+Grants minus penalty : 39
+Drift                : 0
+RESULT: BALANCED - no credits created or lost.
+--------------------------------------------
+
+PL/SQL procedure successfully completed.
+
+
+========== PART E : Module 6, graph analytics ==========
+
+--- E1. Tutor leaderboard (CTE + four analytic functions)
+
+       RNK TUTOR_NAME                                                                        SCHOOL                                                       BADGE_LEVE   SESSIONS      HOURS     RATING
+---------- --------------------------------------------------------------------------------- ------------------------------------------------------------ ---------- ---------- ---------- ----------
+IMPACT_SCORE PERCENTILE   QUARTILE NEXT_TUTOR_HOURS
+------------ ---------- ---------- ----------------
+         1 Aarav Sharma                                                                      SCOPE                                                        BRONZE              2        2.5       4.75
+       11.88          1          1                2
+
+         2 Vivaan Joshi                                                                      SCOPE                                                        BRONZE              1          2          5
+          10         .8          1              1.5
+
+         3 Kabir Singh                                                                       SCOPE                                                        BRONZE              1        1.5        3.5
+        5.25         .6          2                1
+
+         4 Rohan Mehta                                                                       SMEC                                                         BRONZE              1          1        4.5
+         4.5          0          2                1
+
+         4 Neel Verma                                                                        SMEC                                                         BRONZE              1          1          5
+           5          0          3                1
+
+         4 Arjun Patel                                                                       SCOPE                                                        BRONZE              1          1          4
+           4          0          4
+
+
+6 rows selected.
+
+
+--- E2. Knowledge-flow chains (HIERARCHICAL query)
+
+       HOP
+----------
+LEARNER_CHAIN
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+LEARNED_FROM
+----------------------------------------
+KNOWLEDGE_PATH
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+END_OF_CHAIN
+------------
+         1
+Diya
+Aarav
+ <- Aarav
+           1
+
+
+
+--- E3. Cross-department knowledge flow (ROLLUP)
+
+TUTOR_SCHOOL                                                 SUBJECT_SCHOOL                                                 SESSIONS      HOURS     TUTORS
+------------------------------------------------------------ ------------------------------------------------------------ ---------- ---------- ----------
+SCOPE                                                        SAS                                                                   1          1          1
+SCOPE                                                        SCOPE                                                                 4          6          3
+SCOPE                                                        ** all subjects **                                                    5          7          4
+SMEC                                                         SAS                                                                   1          1          1
+SMEC                                                         SCOPE                                                                 1          1          1
+SMEC                                                         ** all subjects **                                                    2          2          2
+** ALL SCHOOLS **                                            ** all subjects **                                                    7          9          6
+
+7 rows selected.
+

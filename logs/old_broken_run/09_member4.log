@@ -1,0 +1,147 @@
+
+========== M4-INSERT : goodwill credit after an outage ==========
+
+1 row created.
+
+
+Commit complete.
+
+
+========== M4-UPDATE : tighten the overdraft policy ==========
+
+1 row updated.
+
+
+Commit complete.
+
+
+1 row updated.
+
+
+Commit complete.
+
+
+========== M4-DELETE : clear escrow, then a true delete ==========
+
+0 rows updated.
+
+
+1 row deleted.
+
+
+========== M4-PROOF : attempts to tamper with the ledger ==========
+Blocked as designed -> ORA-20001: CREDIT_TXN is append-only. Insert a correcting PENALTY or RELEASE row instead of changing history.
+ORA-06512: at "TIMEBANK.TRG_TXN_IMMUTABLE", line 2
+ORA-04088: error during execution of
+trigger 'TIMEBANK.TRG_TXN_IMMUTABLE'
+
+PL/SQL procedure successfully completed.
+
+Blocked as designed -> ORA-20001: CREDIT_TXN is append-only. Insert a correcting PENALTY or RELEASE row instead of changing history.
+ORA-06512: at "TIMEBANK.TRG_TXN_IMMUTABLE", line 2
+ORA-04088: error during execution of
+trigger 'TIMEBANK.TRG_TXN_IMMUTABLE'
+
+PL/SQL procedure successfully completed.
+
+
+===== M4-Q1 : passbook for student 102 (SIMPLE) =====
+
+    TXN_ID POSTED_AT             TXN_TYPE      AMOUNT BALANCE_AFTER BOOKING
+---------- --------------------- --------- ---------- ------------- ----------------------------------------
+REMARKS
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+         2 30-OCT 07:36          GRANT              3             3 -
+Starter grant on registration
+
+
+
+===== M4-Q2 : ledger with session context (OUTER JOIN) =====
+
+    TXN_ID STUDENT_NAME                                                                      TXN_TYPE      AMOUNT SUBJECT      SESSION_DATE    ORIGIN
+---------- --------------------------------------------------------------------------------- --------- ---------- ------------ --------------- --------------
+         1 Aarav Sharma                                                                      GRANT              3 n/a          no session      system credit
+         2 Diya Nair                                                                         GRANT              3 n/a          no session      system credit
+         3 Rohan Mehta                                                                       GRANT              3 n/a          no session      system credit
+         4 Ishita Rao                                                                        GRANT              3 n/a          no session      system credit
+         5 Kabir Singh                                                                       GRANT              3 n/a          no session      system credit
+         6 Ananya Iyer                                                                       GRANT              3 n/a          no session      system credit
+         7 Vivaan Joshi                                                                      GRANT              3 n/a          no session      system credit
+         8 Sara Khan                                                                         GRANT              3 n/a          no session      system credit
+         9 Arjun Patel                                                                       GRANT              3 n/a          no session      system credit
+        10 Riya Desai                                                                        GRANT              3 n/a          no session      system credit
+        11 Neel Verma                                                                        GRANT              3 n/a          no session      system credit
+        12 Meera Pillai                                                                      GRANT              3 n/a          no session      system credit
+        15 Tanvi Krishnan                                                                    GRANT              3 n/a          no session      system credit
+        16 Sara Khan                                                                         HOLD            -1.5 BACSE204     13-NOV          session driven
+        17 Ananya Iyer                                                                       GRANT              1 n/a          no session      system credit
+
+15 rows selected.
+
+
+===== M4-Q3 : who gives and who takes (NESTED) =====
+
+STUDENT_NAME                                                                      CREDITS_IN CREDITS_OUT    BALANCE STANDING
+--------------------------------------------------------------------------------- ---------- ----------- ---------- ---------
+Ananya Iyer                                                                                4           0          4 NET GIVER
+Diya Nair                                                                                  3           0          3 balanced
+Rohan Mehta                                                                                3           0          3 balanced
+Ishita Rao                                                                                 3           0          3 balanced
+Kabir Singh                                                                                3           0          3 balanced
+Tanvi Krishnan                                                                             3           0          3 balanced
+Aarav Sharma                                                                               3           0          3 balanced
+Vivaan Joshi                                                                               3           0          3 balanced
+Arjun Patel                                                                                3           0          3 balanced
+Riya Desai                                                                                 3           0          3 balanced
+Neel Verma                                                                                 3           0          3 balanced
+Meera Pillai                                                                               3           0          3 balanced
+Sara Khan                                                                                  3        -1.5        1.5 balanced
+
+13 rows selected.
+
+
+===== M4-Q4 : ledger tamper check (CORRELATED) -- expect 0 rows =====
+
+no rows selected
+
+
+===== M4-Q5 : closed-economy audit (AGGREGATE) =====
+
+TXN_KIND        ROWS_POSTED NET_CREDITS   SMALLEST    LARGEST
+--------------- ----------- ----------- ---------- ----------
+GRANT                    14          40          1          3
+HOLD                      1        -1.5       -1.5       -1.5
+** ALL TYPES **          15        38.5       -1.5          3
+
+
+--- the balance equation itself --
+
+ALL_BALANCES  IN_ESCROW GRANTS_LESS_PENALTIES      DRIFT VERDICT
+------------ ---------- --------------------- ---------- --------------
+        38.5        1.5                    40          0 BALANCED
+
+
+===== M4-Q6 : recomputed running balance (ANALYTIC) =====
+
+STUDENT                                      TXN_ID TXN_TYPE      AMOUNT RECOMPUTED     STORED CHECK_RE PREVIOUS_ OPENING_GRANT
+---------------------------------------- ---------- --------- ---------- ---------- ---------- -------- --------- -------------
+Aarav                                             1 GRANT              3          3          3 ok                             3
+Diya                                              2 GRANT              3          3          3 ok                             3
+Rohan                                             3 GRANT              3          3          3 ok                             3
+Ishita                                            4 GRANT              3          3          3 ok                             3
+Kabir                                             5 GRANT              3          3          3 ok                             3
+Ananya                                            6 GRANT              3          3          3 ok                             3
+Ananya                                           17 GRANT              1          4          4 ok       GRANT                 3
+Vivaan                                            7 GRANT              3          3          3 ok                             3
+Sara                                              8 GRANT              3          3          3 ok                             3
+Sara                                             16 HOLD            -1.5        1.5        1.5 ok       GRANT                 3
+Arjun                                             9 GRANT              3          3          3 ok                             3
+Riya                                             10 GRANT              3          3          3 ok                             3
+Neel                                             11 GRANT              3          3          3 ok                             3
+Meera                                            12 GRANT              3          3          3 ok                             3
+Tanvi                                            15 GRANT              3          3          3 ok                             3
+
+15 rows selected.
+
+
+===== MEMBER 4 COMPLETE : 3 DML + 6 SELECT = 9 queries =====
